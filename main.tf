@@ -27,7 +27,7 @@ resource "aws_security_group" "alb" {
   }
 }
 
-resource "aws_lb" "nlb" {
+resource "aws_lb" "alb" {
   name                             = substr(local.name, 0, 32) # "name" cannot be longer than 32 characters
   internal                         = var.internal
   load_balancer_type               = var.load_balancer_type
@@ -48,7 +48,7 @@ resource "aws_lb" "nlb" {
 }
 
 resource "aws_lb_listener" "tls" {
-  load_balancer_arn = aws_lb.nlb.arn
+  load_balancer_arn = aws_lb.alb.arn
   port              = "443"
   protocol          = "HTTPS"
   certificate_arn   = var.acm_arn

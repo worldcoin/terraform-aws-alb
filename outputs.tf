@@ -1,7 +1,7 @@
 output "ready" {
   description = "Hack! Because modules with providers (cluster-apps) cannot use depends_on output value needs to be used to make sure those are provisioned in correct order."
   value = {
-    plain = "${aws_lb_listener.plain.arn}:${aws_lb_target_group.plain.id}"
+    tls = "${aws_lb_listener.tls.arn}:${aws_lb_target_group.tls.id}"
   }
 }
 
