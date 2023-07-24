@@ -23,7 +23,7 @@ resource "aws_security_group" "alb" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = [split("\n", trimspace(data.http.cloudflare_ipv4.body))]
+    cidr_blocks = data.cloudflare_ip_ranges.cloudflare.ipv4_cidr_blocks
   }
 }
 

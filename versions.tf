@@ -5,9 +5,9 @@ terraform {
       version = ">= 4.14.0"
     }
 
-    http = {
-      source  = "hashicorp/http"
-      version = ">=3.4.0"
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "4.10.0"
     }
   }
 
