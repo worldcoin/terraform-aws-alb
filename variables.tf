@@ -4,7 +4,7 @@ variable "cluster_name" {
 }
 
 variable "application" {
-  description = "Name of application which will be connected to this NLB"
+  description = "Name of application which will be connected to this ALB"
   type        = string
 }
 
