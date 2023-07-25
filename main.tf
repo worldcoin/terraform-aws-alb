@@ -93,7 +93,7 @@ resource "aws_lb_target_group" "tls" {
 
   tags = {
     "elbv2.k8s.aws/cluster"    = var.cluster_name
-    "ingress.k8s.aws/resource" = "${var.application}-${var.ingress_name}:443"
+    "ingress.k8s.aws/resource" = "${var.ingress_name}-${var.application}:443"
     "ingress.k8s.aws/stack"    = local.stack
   }
 
