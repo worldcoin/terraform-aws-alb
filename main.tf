@@ -37,7 +37,7 @@ resource "aws_security_group" "alb" {
 resource "aws_lb" "alb" {
   name                             = substr(local.name, 0, 32) # "name" cannot be longer than 32 characters
   internal                         = var.internal
-  load_balancer_type               = var.load_balancer_type
+  load_balancer_type               = "application"
   subnets                          = var.public_subnets
   security_groups                  = [aws_security_group.alb.id]
   enable_cross_zone_load_balancing = true
