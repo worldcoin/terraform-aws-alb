@@ -4,7 +4,8 @@ locals {
   name               = join("-", compact([local.short_cluster_name, var.name_suffix]))
   short_name         = substr(local.name, 0, 26) # Shorter name used to bypass 32 char limitation for target groups
   # / is not allowd by k8s anntotations to pick up existing LB
-  stack = replace(var.application, "/", ".")
+  stack            = format("%s.%s", var.namespace, var.application)
+  target_group_tag = format("%s/%s-%s", var.namespace, var.ingress_name, var.application)
 }
 
 resource "aws_security_group" "alb" {
@@ -93,7 +94,7 @@ resource "aws_lb_target_group" "tls" {
 
   tags = {
     "elbv2.k8s.aws/cluster"    = var.cluster_name
-    "ingress.k8s.aws/resource" = "${var.ingress_name}-${var.application}:443"
+    "ingress.k8s.aws/resource" = local.target_group_tag
     "ingress.k8s.aws/stack"    = local.stack
   }
 
