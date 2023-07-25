@@ -40,12 +40,6 @@ variable "internal" {
   type        = bool
 }
 
-variable "load_balancer_type" {
-  description = "The type of load balancer to create. (network/application/gateway)"
-  type        = string
-  default     = "network"
-}
-
 variable "ingress_name" {
   description = "Name of the ingress created on k8s"
   type        = string
