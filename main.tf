@@ -5,7 +5,7 @@ locals {
   short_name         = substr(local.name, 0, 26) # Shorter name used to bypass 32 char limitation for target groups
   # / is not allowd by k8s anntotations to pick up existing LB
   stack            = format("%s.%s", var.namespace, var.application)
-  target_group_tag = format("%s/%s-%s", var.namespace, var.ingress_name, var.application)
+  target_group_tag = format("%s/%s-%s:443", var.namespace, var.ingress_name, var.application)
 }
 
 resource "aws_security_group" "alb" {
