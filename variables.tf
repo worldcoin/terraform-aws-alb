@@ -4,7 +4,12 @@ variable "cluster_name" {
 }
 
 variable "application" {
-  description = "(namespace/app) - Name of application which will be connected to this NLB"
+  description = "Name of application which will be connected to this ALB"
+  type        = string
+}
+
+variable "namespace" {
+  description = "Name of namespace where application is deployed"
   type        = string
 }
 
