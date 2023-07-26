@@ -22,5 +22,5 @@ output "zone_id" {
 
 output "sg_id" {
   description = "Security Group attached to loadbalancer"
-  value       = aws_security_group.alb.id
+  value       = aws_security_group.alb_backend.id
 }

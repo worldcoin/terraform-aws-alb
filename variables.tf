@@ -44,8 +44,3 @@ variable "internal" {
   description = "Set NLB to be internal (available only within VPC)"
   type        = bool
 }
-
-variable "ingress_name" {
-  description = "Name of the ingress created on k8s"
-  type        = string
-}
