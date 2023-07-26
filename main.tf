@@ -52,10 +52,10 @@ resource "aws_lb" "alb" {
   internal           = var.internal
   load_balancer_type = "application"
   subnets            = var.public_subnets
-  security_groups = [
-    var.internal ? null : aws_security_group.alb[0].id,
+  security_groups = compact([
+    var.internal ? "" : aws_security_group.alb[0].id,
     aws_security_group.alb_backend.id
-  ]
+  ])
 
   enable_cross_zone_load_balancing = true
   enable_deletion_protection       = true
