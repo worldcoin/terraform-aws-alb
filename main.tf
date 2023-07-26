@@ -83,6 +83,15 @@ resource "aws_lb_listener" "tls" {
     "ingress.k8s.aws/stack"    = local.stack
   }
 
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      status_code  = "503"
+    }
+  }
+
   lifecycle {
     ignore_changes = [tags_all]
   }
