@@ -53,7 +53,7 @@ resource "aws_lb" "alb" {
   load_balancer_type = "application"
   subnets            = var.public_subnets
   security_groups = [
-    var.internal ? "" : aws_security_group.alb[0].id,
+    var.internal ? null : aws_security_group.alb[0].id,
     aws_security_group.alb_backend.id
   ]
 
