@@ -77,11 +77,6 @@ resource "aws_lb_listener" "tls" {
   protocol          = "HTTPS"
   certificate_arn   = var.acm_arn
 
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tls.arn
-  }
-
   tags = {
     "elbv2.k8s.aws/cluster"    = var.cluster_name
     "ingress.k8s.aws/resource" = "443"
