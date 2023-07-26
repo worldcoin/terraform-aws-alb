@@ -20,7 +20,10 @@ output "zone_id" {
   value       = aws_lb.alb.zone_id
 }
 
-output "sg_id" {
+output "sg_ids" {
   description = "Security Group attached to loadbalancer"
-  value       = aws_security_group.alb_backend.id
+  value = {
+    backend  = aws_security_group.alb_backend.id
+    internet = try(aws_security_group.alb_internet.id, null)
+  }
 }
