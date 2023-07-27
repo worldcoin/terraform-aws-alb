@@ -45,7 +45,14 @@ variable "internal" {
   type        = bool
 }
 
-variable "ingress_name" {
-  description = "Name of the ingress created on k8s"
-  type        = string
+variable "backend_ingress_rules" {
+  description = "The security group rules to allow ingress from."
+  type = set(object({
+    description     = optional(string, "")
+    protocol        = optional(string, "tcp")
+    port            = optional(number, 443)
+    security_groups = optional(list(string))
+    cidr_blocks     = optional(list(string))
+  }))
+  default = []
 }

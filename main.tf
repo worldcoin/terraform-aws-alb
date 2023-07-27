@@ -2,15 +2,14 @@ locals {
   # cluter name without region
   short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.name}", "")
   name               = join("-", compact([local.short_cluster_name, var.name_suffix]))
-  short_name         = substr(local.name, 0, 26) # Shorter name used to bypass 32 char limitation for target groups
   # / is not allowd by k8s anntotations to pick up existing LB
-  stack            = format("%s.%s", var.namespace, var.application)
-  target_group_tag = format("%s/%s-%s:443", var.namespace, var.ingress_name, var.application)
+  stack = format("%s.%s", var.namespace, var.application)
 }
 
 resource "aws_security_group" "alb" {
-  name        = local.name
-  description = "Security group attached to ALB"
+  count       = var.internal ? 0 : 1
+  name        = format("%s-internet", local.name)
+  description = "SG attached to ALB exposing LB to the internet"
   vpc_id      = var.vpc_id
 
   egress {
@@ -35,12 +34,42 @@ resource "aws_security_group" "alb" {
   }
 }
 
+resource "aws_security_group" "alb_backend" {
+  name        = format("%s-backend", local.name)
+  description = "SG to provide network access inside VPC"
+  vpc_id      = var.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  dynamic "ingress" {
+    for_each = var.backend_ingress_rules
+
+    content {
+      description     = ingress.value["description"]
+      from_port       = ingress.value["port"]
+      to_port         = ingress.value["port"]
+      protocol        = ingress.value["protocol"]
+      security_groups = ingress.value["security_groups"]
+      cidr_blocks     = ingress.value["cidr_blocks"]
+    }
+  }
+}
+
 resource "aws_lb" "alb" {
-  name                             = substr(local.name, 0, 32) # "name" cannot be longer than 32 characters
-  internal                         = var.internal
-  load_balancer_type               = "application"
-  subnets                          = var.public_subnets
-  security_groups                  = [aws_security_group.alb.id]
+  name               = substr(local.name, 0, 32) # "name" cannot be longer than 32 characters
+  internal           = var.internal
+  load_balancer_type = "application"
+  subnets            = var.public_subnets
+  security_groups = compact([
+    var.internal ? "" : aws_security_group.alb[0].id,
+    aws_security_group.alb_backend.id
+  ])
+
   enable_cross_zone_load_balancing = true
   enable_deletion_protection       = true
 
@@ -61,15 +90,19 @@ resource "aws_lb_listener" "tls" {
   protocol          = "HTTPS"
   certificate_arn   = var.acm_arn
 
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tls.arn
-  }
-
   tags = {
     "elbv2.k8s.aws/cluster"    = var.cluster_name
     "ingress.k8s.aws/resource" = "443"
     "ingress.k8s.aws/stack"    = local.stack
+  }
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      status_code  = "404"
+    }
   }
 
   lifecycle {
@@ -81,30 +114,4 @@ resource "aws_lb_listener_certificate" "extra" {
   count           = length(var.acm_extra_arns)
   listener_arn    = aws_lb_listener.tls.arn
   certificate_arn = element(var.acm_extra_arns, count.index)
-}
-
-resource "aws_lb_target_group" "tls" {
-  name = "${local.short_name}-tls"
-  port = 30443
-  #we misconfigured something, and currently, traefik serves HTTP on the 443 port. Problem addresed here: https://linear.app/worldcoin/issue/INFRA-855/debug-ingress-websecure-with-http
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
-
-  target_type = "instance"
-
-  tags = {
-    "elbv2.k8s.aws/cluster"    = var.cluster_name
-    "ingress.k8s.aws/resource" = local.target_group_tag
-    "ingress.k8s.aws/stack"    = local.stack
-  }
-
-  stickiness {
-    cookie_duration = 14400
-    enabled         = false
-    type            = "lb_cookie"
-  }
-
-  lifecycle {
-    ignore_changes = [tags_all]
-  }
 }
