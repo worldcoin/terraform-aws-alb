@@ -88,7 +88,7 @@ resource "aws_lb_listener" "tls" {
 
     fixed_response {
       content_type = "text/plain"
-      status_code  = "503"
+      status_code  = "404"
     }
   }
 
