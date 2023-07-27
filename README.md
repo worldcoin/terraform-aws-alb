@@ -71,7 +71,6 @@ No modules.
 |------|-------------|
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the NLB. |
 | <a name="output_dns_name"></a> [dns\_name](#output\_dns\_name) | The DNS name of the NLB. |
-| <a name="output_ready"></a> [ready](#output\_ready) | Hack! Because modules with providers (cluster-apps) cannot use depends\_on output value needs to be used to make sure those are provisioned in correct order. |
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security Group attached to loadbalancer |
 | <a name="output_zone_id"></a> [zone\_id](#output\_zone\_id) | The zone ID of the NLB. |
 <!-- END_TF_DOCS -->
