@@ -44,3 +44,15 @@ variable "internal" {
   description = "Set NLB to be internal (available only within VPC)"
   type        = bool
 }
+
+variable "backend_ingress_rules" {
+  description = "The security group rules to allow ingress from."
+  type = set(object({
+    description     = optional(string, "")
+    protocol        = optional(string, "tcp")
+    port            = optional(number, 443)
+    security_groups = optional(list(string))
+    cidr_blocks     = optional(list(string))
+  }))
+  default = []
+}

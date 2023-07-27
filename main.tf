@@ -9,7 +9,7 @@ locals {
 resource "aws_security_group" "alb" {
   count       = var.internal ? 0 : 1
   name        = format("%s-internet", local.name)
-  description = "Security group attached to ALB"
+  description = "SG attached to ALB exposing LB to the internet"
   vpc_id      = var.vpc_id
 
   egress {
@@ -44,6 +44,19 @@ resource "aws_security_group" "alb_backend" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  dynamic "ingress" {
+    for_each = var.backend_ingress_rules
+
+    content {
+      description     = ingress.value["description"]
+      from_port       = ingress.value["port"]
+      to_port         = ingress.value["port"]
+      protocol        = ingress.value["protocol"]
+      security_groups = ingress.value["security_groups"]
+      cidr_blocks     = ingress.value["cidr_blocks"]
+    }
   }
 }
 
