@@ -1,10 +1,3 @@
-output "ready" {
-  description = "Hack! Because modules with providers (cluster-apps) cannot use depends_on output value needs to be used to make sure those are provisioned in correct order."
-  value = {
-    tls = "${aws_lb_listener.tls.arn}"
-  }
-}
-
 output "arn" {
   description = "The ARN of the NLB."
   value       = aws_lb.alb.arn
