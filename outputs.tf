@@ -24,6 +24,6 @@ output "sg_ids" {
   description = "Security Group attached to loadbalancer"
   value = {
     backend  = aws_security_group.alb_backend.id
-    internet = try(aws_security_group.alb_internet.id, null)
+    internet = var.internal ? null : aws_security_group.alb[0].id
   }
 }
