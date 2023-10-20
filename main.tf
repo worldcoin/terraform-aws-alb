@@ -76,7 +76,7 @@ resource "aws_lb" "alb" {
   access_logs {
     enabled = var.s3_logs_bucket_id != null ? true : false
     bucket  = var.s3_logs_bucket_id
-    prefix  = local.name
+    prefix  = var.cluster_name
   }
 
   tags = {
