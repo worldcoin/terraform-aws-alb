@@ -29,6 +29,12 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "s3_logs_bucket_id" {
+  description = "The ID of S3 bucket where the ALB logs will be stored, enables logging if set"
+  type        = string
+  default     = null
+}
+
 variable "public_subnets" {
   description = "List of public subnets to use"
   type        = list(string)

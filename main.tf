@@ -73,6 +73,12 @@ resource "aws_lb" "alb" {
   enable_cross_zone_load_balancing = true
   enable_deletion_protection       = true
 
+  access_logs {
+    enabled = var.s3_logs_bucket_id != null ? true : false
+    bucket  = var.s3_logs_bucket_id
+    prefix  = local.name
+  }
+
   tags = {
     "elbv2.k8s.aws/cluster"    = var.cluster_name
     "ingress.k8s.aws/resource" = "LoadBalancer"
