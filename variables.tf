@@ -62,3 +62,13 @@ variable "backend_ingress_rules" {
   }))
   default = []
 }
+
+variable "tls_listener_version" {
+  description = "Minimum TLS version served by TLS listener"
+  type        = string
+  default     = "1.3"
+  validation {
+    condition     = var.tls_listener_version == "1.2" || var.tls_listener_version == "1.3"
+    error_message = "Only TLS >= 1.2 or 1.3 are supported"
+  }
+}

@@ -96,6 +96,9 @@ resource "aws_lb_listener" "tls" {
   protocol          = "HTTPS"
   certificate_arn   = var.acm_arn
 
+
+  ssl_policy = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-2021-06" : "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
+
   tags = {
     "elbv2.k8s.aws/cluster"    = var.cluster_name
     "ingress.k8s.aws/resource" = "443"
