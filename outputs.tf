@@ -20,3 +20,8 @@ output "sg_ids" {
     internet = var.internal ? null : aws_security_group.alb[0].id
   }
 }
+
+output "ssl_policy" {
+  description = "SSL Policy attached to loadbalancer"
+  value       = aws_lb_listener.tls.ssl_policy
+}
