@@ -72,6 +72,7 @@ resource "aws_lb" "alb" {
 
   enable_cross_zone_load_balancing = true
   enable_deletion_protection       = true
+  idle_timeout                     = var.idle_timeout
 
   access_logs {
     enabled = var.s3_logs_bucket_id != null ? true : false

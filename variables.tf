@@ -72,3 +72,9 @@ variable "tls_listener_version" {
     error_message = "Only TLS >= 1.2 or 1.3 are supported"
   }
 }
+
+variable "idle_timeout" {
+  description = "The time in seconds that the connection is allowed to be idle"
+  type        = number
+  default     = 60
+}
