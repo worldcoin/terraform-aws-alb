@@ -78,3 +78,9 @@ variable "idle_timeout" {
   type        = number
   default     = 60
 }
+
+variable "open_to_all" {
+  description = "Allow all traffic to the ALB"
+  type        = bool
+  default     = false
+}

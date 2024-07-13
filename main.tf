@@ -23,7 +23,7 @@ resource "aws_security_group" "alb" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = data.cloudflare_ip_ranges.cloudflare.ipv4_cidr_blocks
+    cidr_blocks = var.open_to_all ? "0.0.0.0/0" : data.cloudflare_ip_ranges.cloudflare.ipv4_cidr_blocks
   }
 
   ingress {
