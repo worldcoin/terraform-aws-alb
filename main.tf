@@ -32,6 +32,28 @@ resource "aws_security_group" "alb" {
     protocol         = "tcp"
     ipv6_cidr_blocks = var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidr_blocks
   }
+
+  dynamic "ingress" {
+    for_each = var.additional_open_ports
+
+    content {
+      from_port        = ingress.value["port"]
+      to_port          = ingress.value["port"]
+      protocol         = ingress.value["protocol"]
+      cidr_blocks      = var.open_to_all ? ["0.0.0.0/0"] : data.cloudflare_ip_ranges.cloudflare.ipv4_cidr_blocks
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = var.additional_open_ports
+
+    content {
+      from_port        = ingress.value["port"]
+      to_port          = ingress.value["port"]
+      protocol         = ingress.value["protocol"]
+      ipv6_cidr_blocks = var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidr_blocks
+    }
+  }
 }
 
 resource "aws_security_group" "alb_backend" {
