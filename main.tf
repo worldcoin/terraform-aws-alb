@@ -149,7 +149,7 @@ resource "aws_lb_listener_certificate" "extra" {
 }
 
 resource "aws_lb_listener" "additional_ports" {
-  for_each = { for aop in var.additional_open_ports : additional_open_ports.port => aop }
+  for_each = { for aop in var.additional_open_ports : aop.port => aop }
 
   load_balancer_arn = aws_lb.alb.arn
   port              = each.value.port
