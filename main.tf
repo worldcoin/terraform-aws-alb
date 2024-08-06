@@ -147,34 +147,3 @@ resource "aws_lb_listener_certificate" "extra" {
   listener_arn    = aws_lb_listener.tls.arn
   certificate_arn = element(var.acm_extra_arns, count.index)
 }
-
-resource "aws_lb_listener" "additional_ports" {
-  for_each = { for aop in var.additional_open_ports : aop.port => aop }
-
-  load_balancer_arn = aws_lb.alb.arn
-  port              = each.value.port
-  protocol          = "HTTPS"
-  certificate_arn   = var.acm_arn
-
-
-  ssl_policy = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-2021-06" : "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
-
-  tags = {
-    "elbv2.k8s.aws/cluster"    = var.cluster_name
-    "ingress.k8s.aws/resource" = each.value.port
-    "ingress.k8s.aws/stack"    = local.stack
-  }
-
-  default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      status_code  = "404"
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [tags_all]
-  }
-}
