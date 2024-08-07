@@ -93,3 +93,9 @@ variable "open_to_all" {
   type        = bool
   default     = false
 }
+
+variable "drop_invalid_header_fields" {
+  description = "Drop invalid header fields"
+  type        = bool
+  default     = false
+}
