@@ -99,3 +99,39 @@ variable "waf_enabled" {
   type        = bool
   default     = false
 }
+
+variable "waf_rules" {
+  description = "Rule blocks used to identify the web requests that you want to use."
+  type = list(object({
+    name                                     = string
+    priority                                 = number
+    managed_rule_group_statement_vendor_name = string
+  }))
+  default = [
+    {
+      name                                     = "AWSManagedRulesCommonRuleSet"
+      priority                                 = 0
+      managed_rule_group_statement_vendor_name = "AWS"
+    },
+    {
+      name                                     = "AWSManagedRulesKnownBadInputsRuleSet"
+      priority                                 = 1
+      managed_rule_group_statement_vendor_name = "AWS"
+    },
+    {
+      name                                     = "AWSManagedRulesAmazonIpReputationList"
+      priority                                 = 2
+      managed_rule_group_statement_vendor_name = "AWS"
+    },
+    {
+      name                                     = "AWSManagedRulesAnonymousIpList"
+      priority                                 = 3
+      managed_rule_group_statement_vendor_name = "AWS"
+    },
+    {
+      name                                     = "AWSManagedRulesSQLiRuleSet"
+      priority                                 = 4
+      managed_rule_group_statement_vendor_name = "AWS"
+    }
+  ]
+}

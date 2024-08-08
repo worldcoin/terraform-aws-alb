@@ -10,94 +10,26 @@ resource "aws_wafv2_web_acl" "this" {
     metric_name                = format("%s-alb-waf", local.name)
     sampled_requests_enabled   = true
   }
-  rule {
-    name     = "AWSManagedRulesCommonRuleSet"
-    priority = 0
-    override_action {
-      none {}
-    }
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesCommonRuleSet"
-        vendor_name = "AWS"
+
+  dynamic "rule" {
+    for_each = toset(var.waf_rules)
+    content {
+      name     = rule.value.name
+      priority = rule.value.priority
+      override_action {
+        none {}
       }
-    }
-  }
-  visibility_config {
-    cloudwatch_metrics_enabled = true
-    metric_name                = format("%s-alb-waf-AWSManagedRulesCommonRuleSet", local.name)
-    sampled_requests_enabled   = true
-  }
-  rule {
-    name     = "AWSManagedRulesKnownBadInputsRuleSet"
-    priority = 1
-    override_action {
-      none {}
-    }
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesKnownBadInputsRuleSet"
-        vendor_name = "AWS"
+      statement {
+        managed_rule_group_statement {
+          name        = rule.value.name
+          vendor_name = rule.value.managed_rule_group_statement_vendor_name
+        }
       }
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = format("%s-alb-waf-AWSManagedRulesKnownBadInputsRuleSet", local.name)
-      sampled_requests_enabled   = true
-    }
-  }
-  rule {
-    name     = "AWSManagedRulesAmazonIpReputationList"
-    priority = 2
-    override_action {
-      none {}
-    }
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesAmazonIpReputationList"
-        vendor_name = "AWS"
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = format("%s-alb-waf-%s", local.name, rule.value.name)
+        sampled_requests_enabled   = true
       }
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = format("%s-alb-waf-AWSManagedRulesAmazonIpReputationList", local.name)
-      sampled_requests_enabled   = true
-    }
-  }
-  rule {
-    name     = "AWSManagedRulesAnonymousIpList"
-    priority = 3
-    override_action {
-      none {}
-    }
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesAnonymousIpList"
-        vendor_name = "AWS"
-      }
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = format("%s-alb-waf-AWSManagedRulesAnonymousIpList", local.name)
-      sampled_requests_enabled   = true
-    }
-  }
-  rule {
-    name     = "AWSManagedRulesSQLiRuleSet"
-    priority = 4
-    override_action {
-      none {}
-    }
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesSQLiRuleSet"
-        vendor_name = "AWS"
-      }
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = format("%s-alb-waf-AWSManagedRulesSQLiRuleSet", local.name)
-      sampled_requests_enabled   = true
     }
   }
 }
