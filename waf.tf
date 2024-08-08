@@ -86,6 +86,6 @@ data "aws_iam_policy_document" "s3_logging" {
 resource "aws_wafv2_web_acl_logging_configuration" "logs_to_s3" {
   count = var.waf_enabled ? 1 : 0
 
-  log_destination_configs = [module.log_destination_configs[0].name]
+  log_destination_configs = [module.s3_alb_waf_logs[0].name]
   resource_arn            = aws_wafv2_web_acl.alb_waf[0].arn
 }
