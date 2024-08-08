@@ -95,7 +95,7 @@ variable "open_to_all" {
 }
 
 variable "waf_enabled" {
-  description = "Enable WAF rules and assignee them to the ALB"
+  description = "Enable WAF rules and assign them to the ALB"
   type        = bool
   default     = false
 }
