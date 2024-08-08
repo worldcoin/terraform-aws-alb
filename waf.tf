@@ -39,3 +39,9 @@ resource "aws_wafv2_web_acl_association" "this" {
   resource_arn = aws_lb.alb.arn
   web_acl_arn  = aws_wafv2_web_acl.alb_waf[0].arn
 }
+
+module "s3-logging" {
+  count  = var.waf_enabled ? 1 : 0
+  source = "git@github.com:worldcoin/terraform-aws-s3-bucket?ref=v0.3.2"
+  name   = format("aws-waf-logs-%s", local.name)
+}
