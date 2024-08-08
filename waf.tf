@@ -41,7 +41,44 @@ resource "aws_wafv2_web_acl_association" "this" {
 }
 
 module "s3-logging" {
-  count  = var.waf_enabled ? 1 : 0
-  source = "git@github.com:worldcoin/terraform-aws-s3-bucket?ref=v0.3.2"
-  name   = format("aws-waf-logs-%s", local.name)
+  count         = var.waf_enabled ? 1 : 0
+  source        = "git@github.com:worldcoin/terraform-aws-s3-bucket?ref=v0.3.2"
+  name          = format("aws-waf-logs-%s", local.name)
+  custom_policy = data.aws_iam_policy_document.s3_logging.json
+}
+
+# https://docs.aws.amazon.com/waf/latest/developerguide/logging-s3.html#logging-s3-permissions
+data "aws_iam_policy_document" "s3_logging" {
+  statement {
+    sid       = "LoggingConfigurationAPI"
+    effect    = "Allow"
+    resources = ["*"]
+
+    actions = [
+      "wafv2:PutLoggingConfiguration",
+      "wafv2:DeleteLoggingConfiguration",
+    ]
+  }
+
+  statement {
+    sid       = "WebACLLogDelivery"
+    effect    = "Allow"
+    resources = ["*"]
+
+    actions = [
+      "logs:CreateLogDelivery",
+      "logs:DeleteLogDelivery",
+    ]
+  }
+
+  statement {
+    sid       = "WebACLLoggingS3"
+    effect    = "Allow"
+    resources = ["arn:aws:s3:::aws-waf-logs-${local.name}"]
+
+    actions = [
+      "s3:PutBucketPolicy",
+      "s3:GetBucketPolicy",
+    ]
+  }
 }
