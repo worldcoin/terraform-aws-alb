@@ -18,17 +18,12 @@ module "alb" {
   public_subnets = var.vpc_config.public_subnets
 
   waf_enabled = true
-  waf_rules = [ # default values set to enabled all of them, no need to specific
-    {
-      name = "AWSManagedRulesCommonRuleSet"
-      priority = 0
-      managed_rule_group_statement_vendor_name = "AWS"
-    },
-  ]
 }
 ```
 
 ### WAF
+
+You can override default rules using `waf_rules`
 
 WAF rules are defined as default, if you want to add custom managed WAF rules you need to create your own file due to restrictions in creation of custom rules.
 If you create your own WAF resource you need to deattach WAF rules created in this module.
