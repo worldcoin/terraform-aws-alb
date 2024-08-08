@@ -16,8 +16,19 @@ module "alb" {
   acm_extra_arns = var.acm_extra_arns
   vpc_id         = var.vpc_config.vpc_id
   public_subnets = var.vpc_config.public_subnets
+
+  waf_enabled = true
 }
 ```
+
+### WAF
+
+You can override default rules using `waf_rules`
+
+WAF rules are defined as default, if you want to add custom managed WAF rules you need to create your own file due to restrictions in creation of custom rules.
+If you create your own WAF resource you need to deattach WAF rules created in this module.
+
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -47,6 +58,8 @@ No modules.
 | [aws_lb_listener_certificate.extra](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_certificate) | resource |
 | [aws_security_group.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.alb_backend](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_wafv2_web_acl.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl) | resource |
+| [aws_wafv2_web_acl_association.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl_association) | resource |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [cloudflare_ip_ranges.cloudflare](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/data-sources/ip_ranges) | data source |
 
@@ -69,6 +82,8 @@ No modules.
 | <a name="input_s3_logs_bucket_id"></a> [s3\_logs\_bucket\_id](#input\_s3\_logs\_bucket\_id) | The ID of S3 bucket where the ALB logs will be stored, enables logging if set | `string` | `null` | no |
 | <a name="input_tls_listener_version"></a> [tls\_listener\_version](#input\_tls\_listener\_version) | Minimum TLS version served by TLS listener | `string` | `"1.3"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID where the NLB will be deployed | `string` | n/a | yes |
+| <a name="input_waf_enabled"></a> [waf\_enabled](#input\_waf\_enabled) | Enable WAF rules and assignee them to the ALB | `bool` | `false` | no |
+| <a name="input_waf_rules"></a> [waf\_rules](#input\_waf\_rules) | Rule blocks used to identify the web requests that you want to use. | <pre>list(object({<br>    name                                     = string<br>    priority                                 = number<br>    managed_rule_group_statement_vendor_name = string<br>  }))</pre> | <pre>[<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesCommonRuleSet",<br>    "priority": 0<br>  },<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesKnownBadInputsRuleSet",<br>    "priority": 1<br>  },<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesAmazonIpReputationList",<br>    "priority": 2<br>  },<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesAnonymousIpList",<br>    "priority": 3<br>  },<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesSQLiRuleSet",<br>    "priority": 4<br>  }<br>]</pre> | no |
 
 ## Outputs
 
