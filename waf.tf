@@ -58,6 +58,10 @@ data "aws_iam_policy_document" "s3_logging" {
       "wafv2:PutLoggingConfiguration",
       "wafv2:DeleteLoggingConfiguration",
     ]
+    principals {
+      type        = "AWS"
+      identifiers = "*"
+    }
   }
 
   statement {
@@ -69,6 +73,10 @@ data "aws_iam_policy_document" "s3_logging" {
       "logs:CreateLogDelivery",
       "logs:DeleteLogDelivery",
     ]
+    principals {
+      type        = "AWS"
+      identifiers = "*"
+    }
   }
 
   statement {
@@ -80,6 +88,10 @@ data "aws_iam_policy_document" "s3_logging" {
       "s3:PutBucketPolicy",
       "s3:GetBucketPolicy",
     ]
+    principals {
+      type        = "AWS"
+      identifiers = "*"
+    }
   }
 }
 
