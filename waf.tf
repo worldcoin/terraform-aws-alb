@@ -60,7 +60,7 @@ data "aws_iam_policy_document" "s3_logging" {
     ]
     principals {
       type        = "AWS"
-      identifiers = "*"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
   }
 
@@ -75,7 +75,7 @@ data "aws_iam_policy_document" "s3_logging" {
     ]
     principals {
       type        = "AWS"
-      identifiers = "*"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
   }
 
@@ -90,7 +90,7 @@ data "aws_iam_policy_document" "s3_logging" {
     ]
     principals {
       type        = "AWS"
-      identifiers = "*"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
   }
 }
