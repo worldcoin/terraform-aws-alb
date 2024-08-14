@@ -43,7 +43,7 @@ resource "aws_wafv2_web_acl_association" "this" {
 module "s3_alb_waf_logs" {
   count         = var.waf_enabled ? 1 : 0
   source        = "git@github.com:worldcoin/terraform-aws-s3-bucket?ref=v0.3.2"
-  name          = format("aws-waf-logs-%s", local.name)
+  name          = format("aws-waf-logs-%s-%s", local.name, data.aws_region.current.name)
   custom_policy = data.aws_iam_policy_document.s3_logging.json
 }
 
@@ -58,6 +58,10 @@ data "aws_iam_policy_document" "s3_logging" {
       "wafv2:PutLoggingConfiguration",
       "wafv2:DeleteLoggingConfiguration",
     ]
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
   }
 
   statement {
@@ -69,6 +73,10 @@ data "aws_iam_policy_document" "s3_logging" {
       "logs:CreateLogDelivery",
       "logs:DeleteLogDelivery",
     ]
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
   }
 
   statement {
@@ -80,6 +88,10 @@ data "aws_iam_policy_document" "s3_logging" {
       "s3:PutBucketPolicy",
       "s3:GetBucketPolicy",
     ]
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
   }
 }
 
