@@ -41,9 +41,9 @@ resource "aws_wafv2_web_acl_association" "this" {
 }
 
 module "s3_alb_waf_logs" {
-  count         = var.waf_enabled ? 1 : 0
-  source        = "git@github.com:worldcoin/terraform-aws-s3-bucket?ref=v0.3.2"
-  name          = format("aws-waf-logs-%s-%s", local.name, data.aws_region.current.name)
+  count  = var.waf_enabled ? 1 : 0
+  source = "git@github.com:worldcoin/terraform-aws-s3-bucket?ref=v0.3.2"
+  name   = format("aws-waf-logs-%s-%s", local.name, data.aws_region.current.name)
 }
 
 resource "aws_wafv2_web_acl_logging_configuration" "logs_to_s3" {
