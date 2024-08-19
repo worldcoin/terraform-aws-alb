@@ -1,3 +1,33 @@
+locals {
+  waf_rules = length(var.waf_rules) != 0 ? var.waf_rules : [
+    {
+      name                                     = "AWSManagedRulesCommonRuleSet"
+      priority                                 = 0
+      managed_rule_group_statement_vendor_name = "AWS"
+    },
+    {
+      name                                     = "AWSManagedRulesKnownBadInputsRuleSet"
+      priority                                 = 1
+      managed_rule_group_statement_vendor_name = "AWS"
+    },
+    {
+      name                                     = "AWSManagedRulesAmazonIpReputationList"
+      priority                                 = 2
+      managed_rule_group_statement_vendor_name = "AWS"
+    },
+    {
+      name                                     = "AWSManagedRulesAnonymousIpList"
+      priority                                 = 3
+      managed_rule_group_statement_vendor_name = "AWS"
+    },
+    {
+      name                                     = "AWSManagedRulesSQLiRuleSet"
+      priority                                 = 4
+      managed_rule_group_statement_vendor_name = "AWS"
+    }
+  ]
+}
+
 resource "aws_wafv2_web_acl" "alb_waf" {
   count = var.waf_enabled ? 1 : 0
   name  = format("%s-waf", local.name)
@@ -12,7 +42,7 @@ resource "aws_wafv2_web_acl" "alb_waf" {
   }
 
   dynamic "rule" {
-    for_each = toset(var.waf_rules)
+    for_each = toset(local.waf_rules)
     content {
       name     = rule.value.name
       priority = rule.value.priority

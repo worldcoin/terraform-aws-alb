@@ -107,33 +107,7 @@ variable "waf_rules" {
     priority                                 = number
     managed_rule_group_statement_vendor_name = string
   }))
-  default = [
-    {
-      name                                     = "AWSManagedRulesCommonRuleSet"
-      priority                                 = 0
-      managed_rule_group_statement_vendor_name = "AWS"
-    },
-    {
-      name                                     = "AWSManagedRulesKnownBadInputsRuleSet"
-      priority                                 = 1
-      managed_rule_group_statement_vendor_name = "AWS"
-    },
-    {
-      name                                     = "AWSManagedRulesAmazonIpReputationList"
-      priority                                 = 2
-      managed_rule_group_statement_vendor_name = "AWS"
-    },
-    {
-      name                                     = "AWSManagedRulesAnonymousIpList"
-      priority                                 = 3
-      managed_rule_group_statement_vendor_name = "AWS"
-    },
-    {
-      name                                     = "AWSManagedRulesSQLiRuleSet"
-      priority                                 = 4
-      managed_rule_group_statement_vendor_name = "AWS"
-    }
-  ]
+  default = []
 }
 
 variable "drop_invalid_header_fields" {
