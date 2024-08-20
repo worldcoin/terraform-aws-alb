@@ -87,9 +87,9 @@ module "aws_dd_forwarder_lambda" {
   count = var.waf_enabled ? 1 : 0
 
   source           = "git@github.com:worldcoin/terraform-aws-modules.git//dd-forwarder-lambda?ref=v2.1.2"
-  environment      = "stage"
+  environment      = var.environment
   lambda_s3_bucket = module.s3_alb_waf_logs[0].name
-  account_name     = "orb"
+  account_name     = var.account_name
 
   datadog_api_key = var.datadog_api_key
 }

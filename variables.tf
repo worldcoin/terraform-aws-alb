@@ -120,3 +120,13 @@ variable "datadog_api_key" {
   description = "API Key for Datadog"
   type        = string
 }
+
+variable "environment" {
+  description = "Name of the environment"
+  type        = string
+}
+
+variable "account_name" {
+  description = "The name of the AWS Aaccount"
+  type        = string
+}
