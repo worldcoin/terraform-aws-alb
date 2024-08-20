@@ -124,9 +124,11 @@ variable "datadog_api_key" {
 variable "environment" {
   description = "Name of the environment"
   type        = string
+  default     = ""
 }
 
 variable "account_name" {
   description = "The name of the AWS Aaccount"
   type        = string
+  default     = ""
 }
