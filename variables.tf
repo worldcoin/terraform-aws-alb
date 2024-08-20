@@ -115,3 +115,8 @@ variable "drop_invalid_header_fields" {
   type        = bool
   default     = false
 }
+
+variable "datadog_api_key" {
+  description = "API Key for Datadog"
+  type        = string
+}

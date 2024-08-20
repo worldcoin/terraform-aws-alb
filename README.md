@@ -47,7 +47,10 @@ If you create your own WAF resource you need to deattach WAF rules created in th
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_aws_dd_forwarder_lambda"></a> [aws\_dd\_forwarder\_lambda](#module\_aws\_dd\_forwarder\_lambda) | git@github.com:worldcoin/terraform-aws-modules.git//dd-forwarder-lambda | v2.1.2 |
+| <a name="module_s3_alb_waf_logs"></a> [s3\_alb\_waf\_logs](#module\_s3\_alb\_waf\_logs) | git@github.com:worldcoin/terraform-aws-s3-bucket | v0.3.2 |
 
 ## Resources
 
@@ -58,8 +61,9 @@ No modules.
 | [aws_lb_listener_certificate.extra](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_certificate) | resource |
 | [aws_security_group.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.alb_backend](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_wafv2_web_acl.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl) | resource |
+| [aws_wafv2_web_acl.alb_waf](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl) | resource |
 | [aws_wafv2_web_acl_association.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl_association) | resource |
+| [aws_wafv2_web_acl_logging_configuration.logs_to_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl_logging_configuration) | resource |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [cloudflare_ip_ranges.cloudflare](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/data-sources/ip_ranges) | data source |
 
@@ -73,6 +77,8 @@ No modules.
 | <a name="input_application"></a> [application](#input\_application) | Name of application which will be connected to this ALB | `string` | n/a | yes |
 | <a name="input_backend_ingress_rules"></a> [backend\_ingress\_rules](#input\_backend\_ingress\_rules) | The security group rules to allow ingress from. | <pre>set(object({<br>    description     = optional(string, "")<br>    protocol        = optional(string, "tcp")<br>    port            = optional(number, 443)<br>    security_groups = optional(list(string))<br>    cidr_blocks     = optional(list(string))<br>  }))</pre> | `[]` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster will be used as suffix to all resources | `string` | n/a | yes |
+| <a name="input_datadog_api_key"></a> [datadog\_api\_key](#input\_datadog\_api\_key) | API Key for Datadog | `string` | n/a | yes |
+| <a name="input_drop_invalid_header_fields"></a> [drop\_invalid\_header\_fields](#input\_drop\_invalid\_header\_fields) | Drop invalid header fields | `bool` | `false` | no |
 | <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | The time in seconds that the connection is allowed to be idle | `number` | `60` | no |
 | <a name="input_internal"></a> [internal](#input\_internal) | Set NLB to be internal (available only within VPC) | `bool` | n/a | yes |
 | <a name="input_name_suffix"></a> [name\_suffix](#input\_name\_suffix) | Part of the name used to differentiate NLBs for multiple traefik instances | `string` | `""` | no |
@@ -82,8 +88,8 @@ No modules.
 | <a name="input_s3_logs_bucket_id"></a> [s3\_logs\_bucket\_id](#input\_s3\_logs\_bucket\_id) | The ID of S3 bucket where the ALB logs will be stored, enables logging if set | `string` | `null` | no |
 | <a name="input_tls_listener_version"></a> [tls\_listener\_version](#input\_tls\_listener\_version) | Minimum TLS version served by TLS listener | `string` | `"1.3"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID where the NLB will be deployed | `string` | n/a | yes |
-| <a name="input_waf_enabled"></a> [waf\_enabled](#input\_waf\_enabled) | Enable WAF rules and assignee them to the ALB | `bool` | `false` | no |
-| <a name="input_waf_rules"></a> [waf\_rules](#input\_waf\_rules) | Rule blocks used to identify the web requests that you want to use. | <pre>list(object({<br>    name                                     = string<br>    priority                                 = number<br>    managed_rule_group_statement_vendor_name = string<br>  }))</pre> | <pre>[<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesCommonRuleSet",<br>    "priority": 0<br>  },<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesKnownBadInputsRuleSet",<br>    "priority": 1<br>  },<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesAmazonIpReputationList",<br>    "priority": 2<br>  },<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesAnonymousIpList",<br>    "priority": 3<br>  },<br>  {<br>    "managed_rule_group_statement_vendor_name": "AWS",<br>    "name": "AWSManagedRulesSQLiRuleSet",<br>    "priority": 4<br>  }<br>]</pre> | no |
+| <a name="input_waf_enabled"></a> [waf\_enabled](#input\_waf\_enabled) | Enable WAF rules and assign them to the ALB | `bool` | `false` | no |
+| <a name="input_waf_rules"></a> [waf\_rules](#input\_waf\_rules) | Rule blocks used to identify the web requests that you want to use. | <pre>list(object({<br>    name                                     = string<br>    priority                                 = number<br>    managed_rule_group_statement_vendor_name = string<br>  }))</pre> | `[]` | no |
 
 ## Outputs
 

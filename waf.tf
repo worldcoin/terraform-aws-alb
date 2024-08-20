@@ -82,3 +82,14 @@ resource "aws_wafv2_web_acl_logging_configuration" "logs_to_s3" {
   log_destination_configs = [module.s3_alb_waf_logs[0].arn]
   resource_arn            = aws_wafv2_web_acl.alb_waf[0].arn
 }
+
+module "aws_dd_forwarder_lambda" {
+  count = var.waf_enabled ? 1 : 0
+
+  source           = "git@github.com:worldcoin/terraform-aws-modules.git//dd-forwarder-lambda?ref=v2.1.2"
+  environment      = "stage"
+  lambda_s3_bucket = module.s3_alb_waf_logs[0].name
+  account_name     = "orb"
+
+  datadog_api_key = var.datadog_api_key
+}
