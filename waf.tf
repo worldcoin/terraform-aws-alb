@@ -71,9 +71,10 @@ resource "aws_wafv2_web_acl_association" "this" {
 }
 
 module "s3_alb_waf_logs" {
-  count  = var.waf_enabled ? 1 : 0
-  source = "git@github.com:worldcoin/terraform-aws-s3-bucket?ref=v0.3.2"
-  name   = format("aws-waf-logs-%s-%s", local.name, data.aws_region.current.name)
+  count         = var.waf_enabled ? 1 : 0
+  source        = "git@github.com:worldcoin/terraform-aws-s3-bucket?ref=v0.3.2"
+  name          = format("aws-waf-logs-%s-%s", local.name, data.aws_region.current.name)
+  custom_policy = data.aws_iam_policy_document.allow_s3_logging.json
 }
 
 resource "aws_wafv2_web_acl_logging_configuration" "logs_to_s3" {
@@ -81,4 +82,60 @@ resource "aws_wafv2_web_acl_logging_configuration" "logs_to_s3" {
 
   log_destination_configs = [module.s3_alb_waf_logs[0].arn]
   resource_arn            = aws_wafv2_web_acl.alb_waf[0].arn
+}
+
+data "aws_iam_policy_document" "allow_s3_logging" {
+  statement {
+    sid       = "AWSLogDeliveryWrite"
+    effect    = "Allow"
+    resources = ["arn:aws:s3:::${module.s3_alb_waf_logs[0].name}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
+    actions   = ["s3:PutObject"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+    }
+
+    principals {
+      type        = "Service"
+      identifiers = ["delivery.logs.amazonaws.com"]
+    }
+  }
+
+  statement {
+    sid       = "AWSLogDeliveryAclCheck"
+    effect    = "Allow"
+    resources = [module.s3_alb_waf_logs[0].arn]
+    actions   = ["s3:GetBucketAcl"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+    }
+
+    principals {
+      type        = "Service"
+      identifiers = ["delivery.logs.amazonaws.com"]
+    }
+  }
 }
