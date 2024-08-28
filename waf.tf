@@ -1,5 +1,5 @@
 locals {
-  waf_rules = var.empty_waf_rules == true ? [] : (length(var.waf_rules) != 0 ? var.waf_rules : [
+  waf_rules = var.empty_waf_rules ? [] : (length(var.waf_rules) != 0 ? var.waf_rules : [
     {
       name                                     = "AWSManagedRulesCommonRuleSet"
       priority                                 = 0
