@@ -115,3 +115,9 @@ variable "drop_invalid_header_fields" {
   type        = bool
   default     = false
 }
+
+variable "empty_waf_rules" {
+  description = "Set to true to create empty WAF rules"
+  type        = bool
+  default     = false
+}

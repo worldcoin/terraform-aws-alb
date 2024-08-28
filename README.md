@@ -42,8 +42,8 @@ If you create your own WAF resource you need to deattach WAF rules created in th
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.14.0 |
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | ~> 4.10 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.64.0 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | 4.40.0 |
 
 ## Modules
 
@@ -79,6 +79,7 @@ If you create your own WAF resource you need to deattach WAF rules created in th
 | <a name="input_backend_ingress_rules"></a> [backend\_ingress\_rules](#input\_backend\_ingress\_rules) | The security group rules to allow ingress from. | <pre>set(object({<br>    description     = optional(string, "")<br>    protocol        = optional(string, "tcp")<br>    port            = optional(number, 443)<br>    security_groups = optional(list(string))<br>    cidr_blocks     = optional(list(string))<br>  }))</pre> | `[]` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster will be used as suffix to all resources | `string` | n/a | yes |
 | <a name="input_drop_invalid_header_fields"></a> [drop\_invalid\_header\_fields](#input\_drop\_invalid\_header\_fields) | Drop invalid header fields | `bool` | `false` | no |
+| <a name="input_empty_waf_rules"></a> [empty\_waf\_rules](#input\_empty\_waf\_rules) | Set to true to create empty WAF rules | `bool` | `false` | no |
 | <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | The time in seconds that the connection is allowed to be idle | `number` | `60` | no |
 | <a name="input_internal"></a> [internal](#input\_internal) | Set NLB to be internal (available only within VPC) | `bool` | n/a | yes |
 | <a name="input_name_suffix"></a> [name\_suffix](#input\_name\_suffix) | Part of the name used to differentiate NLBs for multiple traefik instances | `string` | `""` | no |
@@ -99,5 +100,6 @@ If you create your own WAF resource you need to deattach WAF rules created in th
 | <a name="output_dns_name"></a> [dns\_name](#output\_dns\_name) | The DNS name of the NLB. |
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security Group attached to loadbalancer |
 | <a name="output_ssl_policy"></a> [ssl\_policy](#output\_ssl\_policy) | SSL Policy attached to loadbalancer |
+| <a name="output_waf_arn"></a> [waf\_arn](#output\_waf\_arn) | The ARN of the WAF. |
 | <a name="output_zone_id"></a> [zone\_id](#output\_zone\_id) | The zone ID of the NLB. |
 <!-- END_TF_DOCS -->

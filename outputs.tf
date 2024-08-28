@@ -25,3 +25,8 @@ output "ssl_policy" {
   description = "SSL Policy attached to loadbalancer"
   value       = aws_lb_listener.tls.ssl_policy
 }
+
+output "waf_arn" {
+  description = "The ARN of the WAF."
+  value       = var.waf_enabled ? aws_wafv2_web_acl.alb_waf[0].arn : null
+}

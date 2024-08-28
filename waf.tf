@@ -1,5 +1,5 @@
 locals {
-  waf_rules = length(var.waf_rules) != 0 ? var.waf_rules : [
+  waf_rules = var.empty_waf_rules == true ? [] : (length(var.waf_rules) != 0 ? var.waf_rules : [
     {
       name                                     = "AWSManagedRulesCommonRuleSet"
       priority                                 = 0
@@ -25,7 +25,7 @@ locals {
       priority                                 = 4
       managed_rule_group_statement_vendor_name = "AWS"
     }
-  ]
+  ])
 }
 
 resource "aws_wafv2_web_acl" "alb_waf" {
