@@ -97,10 +97,13 @@ resource "aws_lb" "alb" {
   idle_timeout                     = var.idle_timeout
   drop_invalid_header_fields       = var.drop_invalid_header_fields
 
-  access_logs {
-    enabled = var.s3_logs_bucket_id != null ? true : false
-    bucket  = var.s3_logs_bucket_id
-    prefix  = var.cluster_name
+  dynamic "access_logs" {
+    for_each = length(var.s3_logs_bucket_id) > 0 ? [1] : [] # Create block only if bucket name is set
+    content {
+      enabled = true
+      bucket  = var.s3_logs_bucket_id
+      prefix  = var.cluster_name
+    }
   }
 
   tags = {
