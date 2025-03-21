@@ -63,6 +63,15 @@ variable "backend_ingress_rules" {
   default = []
 }
 
+variable "additional_open_ports" {
+  description = "Additional ports accessible from the Internet for the ALB"
+  type = set(object({
+    port     = number
+    protocol = optional(string, "tcp")
+  }))
+  default = []
+}
+
 variable "tls_listener_version" {
   description = "Minimum TLS version served by TLS listener"
   type        = string
@@ -81,6 +90,12 @@ variable "idle_timeout" {
 
 variable "open_to_all" {
   description = "Allow all traffic to the ALB"
+  type        = bool
+  default     = false
+}
+
+variable "drop_invalid_header_fields" {
+  description = "Drop invalid header fields"
   type        = bool
   default     = false
 }
