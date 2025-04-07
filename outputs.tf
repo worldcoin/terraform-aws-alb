@@ -25,3 +25,8 @@ output "ssl_policy" {
   description = "SSL Policy attached to loadbalancer"
   value       = aws_lb_listener.tls.ssl_policy
 }
+
+output "listener_arn" {
+  description = "The ARN of the ALB default listener."
+  value       = aws_lb_listener.tls.arn
+}
