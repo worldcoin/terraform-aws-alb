@@ -83,7 +83,7 @@ resource "aws_security_group" "alb_backend" {
 }
 
 resource "aws_lb" "alb" {
-  name               = substr(local.name, 0, 32) # "name" cannot be longer than 32 characters
+  name               = trimsuffix(substr(local.name, 0, 32), "-") # "name" cannot be longer than 32 characters and cannot end with "-"
   internal           = var.internal
   load_balancer_type = "application"
   subnets            = var.public_subnets
