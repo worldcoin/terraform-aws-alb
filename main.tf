@@ -1,8 +1,8 @@
 locals {
-  # cluter name without region
-  short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.name}", "")
+  # cluster name without region
+  short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.region}", "")
   name               = join("-", compact([local.short_cluster_name, var.name_suffix]))
-  # / is not allowd by k8s anntotations to pick up existing LB
+  # / is not allowed by k8s annotations to pick up existing LB
   stack = format("%s.%s", var.namespace, var.application)
 }
 
@@ -23,14 +23,14 @@ resource "aws_security_group" "alb" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = var.open_to_all ? ["0.0.0.0/0"] : data.cloudflare_ip_ranges.cloudflare.ipv4_cidr_blocks
+    cidr_blocks = var.open_to_all ? ["0.0.0.0/0"] : data.cloudflare_ip_ranges.cloudflare.ipv4_cidrs
   }
 
   ingress {
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
-    ipv6_cidr_blocks = var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidr_blocks
+    ipv6_cidr_blocks = var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidrs
   }
 
   dynamic "ingress" {
@@ -40,7 +40,7 @@ resource "aws_security_group" "alb" {
       from_port   = ingress.value["port"]
       to_port     = ingress.value["port"]
       protocol    = ingress.value["protocol"]
-      cidr_blocks = var.open_to_all ? ["0.0.0.0/0"] : data.cloudflare_ip_ranges.cloudflare.ipv4_cidr_blocks
+      cidr_blocks = var.open_to_all ? ["0.0.0.0/0"] : data.cloudflare_ip_ranges.cloudflare.ipv4_cidrs
     }
   }
 
@@ -51,7 +51,7 @@ resource "aws_security_group" "alb" {
       from_port        = ingress.value["port"]
       to_port          = ingress.value["port"]
       protocol         = ingress.value["protocol"]
-      ipv6_cidr_blocks = var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidr_blocks
+      ipv6_cidr_blocks = var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidrs
     }
   }
 }
