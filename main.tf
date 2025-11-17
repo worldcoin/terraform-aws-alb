@@ -164,7 +164,7 @@ resource "aws_lb_listener_certificate" "extra" {
 
 // mTLS trust store: use S3 objects specified by variables when mtls_enabled
 resource "aws_lb_trust_store" "root_ca" {
-  for_each = var.mtls_enabled ? [1] : []
+  count = var.mtls_enabled ? 1 : 0
 
   ca_certificates_bundle_s3_bucket = "wld-mtls-ca-prod"
   ca_certificates_bundle_s3_key    = "ca_cert/RootCA.pem"
