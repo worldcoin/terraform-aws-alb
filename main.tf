@@ -132,6 +132,16 @@ resource "aws_lb_listener" "tls" {
     "ingress.k8s.aws/stack"    = local.stack
   }
 
+  dynamic "mutual_authentication" {
+    for_each = var.mtls_enabled ? [1] : []
+
+    content {
+      mode                             = "verify"
+      trust_store_arn                  = aws_lb_trust_store.root_ca[0].arn
+      ignore_client_certificate_expiry = false
+    }
+  }
+
   default_action {
     type = "fixed-response"
 
@@ -150,4 +160,14 @@ resource "aws_lb_listener_certificate" "extra" {
   count           = length(var.acm_extra_arns)
   listener_arn    = aws_lb_listener.tls.arn
   certificate_arn = element(var.acm_extra_arns, count.index)
+}
+
+// mTLS trust store: use S3 objects specified by variables when mtls_enabled
+resource "aws_lb_trust_store" "root_ca" {
+  for_each = var.mtls_enabled ? [1] : []
+
+  ca_certificates_bundle_s3_bucket = "wld-mtls-ca-prod"
+  ca_certificates_bundle_s3_key    = "ca_cert/RootCA.pem"
+
+  provider = aws.internal-tools
 }

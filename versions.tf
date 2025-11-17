@@ -3,6 +3,7 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 4.14.0"
+      aliases = [aws, aws.internal-tools]
     }
 
     cloudflare = {
