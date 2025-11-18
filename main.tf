@@ -168,6 +168,4 @@ resource "aws_lb_trust_store" "root_ca" {
 
   ca_certificates_bundle_s3_bucket = "wld-mtls-ca-prod"
   ca_certificates_bundle_s3_key    = "ca_cert/RootCA.pem"
-
-  provider = aws.internal-tools
 }
