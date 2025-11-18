@@ -19,6 +19,17 @@ module "alb" {
 }
 ```
 
+## mTLS (Mutual TLS)
+
+To enable mTLS on the ALB listener set the following variables:
+
+- `mtls_enabled = true`
+
+Notes:
+
+- This module will create `aws_lb_trust_store`resources.
+- The ALB needs read access to the specified S3 objects. 
+
 ### WAF
 
 You can override default rules using `waf_rules`

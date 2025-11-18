@@ -99,3 +99,9 @@ variable "drop_invalid_header_fields" {
   type        = bool
   default     = false
 }
+
+variable "mtls_enabled" {
+  description = "Enable mutual TLS (mTLS) on the ALB TLS listener"
+  type        = bool
+  default     = true
+}
