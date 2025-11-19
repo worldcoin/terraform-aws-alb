@@ -115,7 +115,7 @@ variable "region" {
 variable "ca_s3_bucket" {
   description = "S3 bucket where the CA certificates for mTLS are stored"
   type        = string
-  default     = "wld-mtls-ca-${var.region}"
+  default     = "wld-mtls-ca"
 }
 
 variable "ca_s3_key" {
