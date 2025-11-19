@@ -105,3 +105,15 @@ variable "mtls_enabled" {
   type        = bool
   default     = true
 }
+
+variable "mtls_s3_bucket" {
+  description = "S3 bucket where the CA certificates for mTLS are stored"
+  type        = string
+  default     = "wld-mtls-ca-us-east-1"
+}
+
+variable "mtls_s3_key" {
+  description = "S3 key where the CA certificates for mTLS are stored"
+  type        = string
+  default     = "ca_cert/RootCA.pem"
+}

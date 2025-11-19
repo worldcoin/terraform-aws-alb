@@ -3,9 +3,10 @@
 The module code is based on github.com/worldcoin/terraform-aws-nlb
 
 ## Example
+
 ```terraform
 module "alb" {
-  source = "github.com/worldcoin/terraform-aws-alb?ref=v0.1.0"
+  source = "github.com/worldcoin/terraform-aws-alb?ref=v1.1.0"
 
   cluster_name = var.name
   application  = "traefik/traefik"
@@ -21,14 +22,10 @@ module "alb" {
 
 ## mTLS (Mutual TLS)
 
-To enable mTLS on the ALB listener set the following variables:
+By default mTLS for ALB listener is enable with this module.
+If you want to disable it set variable to false
 
-- `mtls_enabled = true`
-
-Notes:
-
-- This module will create `aws_lb_trust_store`resources.
-- The ALB needs read access to the specified S3 objects. 
+- `mtls_enabled = false`
 
 ### WAF
 
