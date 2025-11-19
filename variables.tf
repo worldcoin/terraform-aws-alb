@@ -106,16 +106,10 @@ variable "mtls_enabled" {
   default     = true
 }
 
-variable "region" {
-  description = "AWS region where resources will be created"
-  type        = string
-  default     = "us-east-1"
-}
-
 variable "ca_s3_bucket" {
   description = "S3 bucket where the CA certificates for mTLS are stored"
   type        = string
-  default     = "wld-mtls-ca"
+  default     = "wld-mtls-ca-us-east-1"
 }
 
 variable "ca_s3_key" {
