@@ -106,13 +106,13 @@ variable "mtls_enabled" {
   default     = true
 }
 
-variable "ca_s3_bucket" {
+variable "mtls_s3_bucket" {
   description = "S3 bucket where the CA certificates for mTLS are stored"
   type        = string
   default     = "wld-mtls-ca-us-east-1"
 }
 
-variable "ca_s3_key" {
+variable "mtls_s3_key" {
   description = "S3 key where the CA certificates for mTLS are stored"
   type        = string
   default     = "ca_cert/RootCA.pem"

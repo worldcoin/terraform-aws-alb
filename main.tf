@@ -166,6 +166,6 @@ resource "aws_lb_listener_certificate" "extra" {
 resource "aws_lb_trust_store" "root_ca" {
   count = var.mtls_enabled ? 1 : 0
 
-  ca_certificates_bundle_s3_bucket = var.ca_s3_bucket
-  ca_certificates_bundle_s3_key    = var.ca_s3_key
+  ca_certificates_bundle_s3_bucket = var.mtls_s3_bucket
+  ca_certificates_bundle_s3_key    = var.mtls_s3_key
 }
