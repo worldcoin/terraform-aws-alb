@@ -117,3 +117,12 @@ variable "mtls_s3_key" {
   type        = string
   default     = "ca_cert/RootCA.pem"
 }
+
+variable "datadog" {
+  description = "Datadog configuration"
+  default     = null
+  type = object({
+    monitoring_notification_channel  = string
+    client_tls_negotiation_threshold = optional(number, 5)
+  })
+}

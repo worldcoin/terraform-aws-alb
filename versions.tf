@@ -9,6 +9,11 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = ">= 5.8"
     }
+
+    datadog = {
+      source  = "DataDog/datadog"
+      version = ">= 3.0"
+    }
   }
 
   required_version = ">= 1.0"

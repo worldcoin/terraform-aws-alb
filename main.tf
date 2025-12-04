@@ -3,7 +3,8 @@ locals {
   short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.name}", "")
   name               = join("-", compact([local.short_cluster_name, var.name_suffix]))
   # / is not allowd by k8s anntotations to pick up existing LB
-  stack = format("%s.%s", var.namespace, var.application)
+  stack    = format("%s.%s", var.namespace, var.application)
+  alb_name = trimsuffix(substr(local.name, 0, 32), "-") # "name" cannot be longer than 32 characters and cannot end with "-"
 }
 
 resource "aws_security_group" "alb" {
@@ -83,7 +84,7 @@ resource "aws_security_group" "alb_backend" {
 }
 
 resource "aws_lb" "alb" {
-  name               = trimsuffix(substr(local.name, 0, 32), "-") # "name" cannot be longer than 32 characters and cannot end with "-"
+  name               = local.alb_name
   internal           = var.internal
   load_balancer_type = "application"
   subnets            = var.public_subnets
