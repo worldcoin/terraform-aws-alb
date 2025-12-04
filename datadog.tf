@@ -1,5 +1,5 @@
 resource "datadog_monitor" "traefik_alb_client_tls_negotiation" {
-  count = var.datadog == null ? 0 : 1
+  count = var.mtls_enabled && var.datadog != null ? 1 : 0
 
   name    = format("ALB TLS negotiation errors (%s)", local.alb_name)
   type    = "metric alert"
