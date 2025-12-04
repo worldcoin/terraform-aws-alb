@@ -10,7 +10,7 @@ ${var.datadog.monitoring_notification_channel}
 EOT
 
   query = format(
-    "avg(last_15m):sum:aws.applicationelb.client_tlsnegotiation_error_count{host:%s} by {host}.as_rate() > %d",
+    "avg(last_15m):sum:aws.applicationelb.client_tlsnegotiation_error_count{host:%s*} by {host}.as_rate() > %d",
     local.alb_name,
     var.datadog.client_tls_negotiation_threshold
   )
