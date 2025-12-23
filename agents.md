@@ -7,7 +7,7 @@
 ## Repository layout (high-level)
 
 This repo is a collection of reusable Terraform modules for common AWS and other tools.
-each folder represents STANDALONE module, and is expected to clear tests, work and verifify in isolation from others.
+root folder represents STANDALONE module, and is expected to clear tests, work and verifify in isolation from others.
 
 
 ## Supported modes
@@ -20,7 +20,7 @@ each folder represents STANDALONE module, and is expected to clear tests, work a
 - Credentials for cloud provider (AWS), Terraform Enterprise token
 
 - Local / AI suggestions MAY use:
-  - From `<module>` dir:
+  - From root dir:
     - terraform init
     - terraform fmt -check
     - terraform validate
