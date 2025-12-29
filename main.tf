@@ -1,6 +1,6 @@
 locals {
   # cluter name without region
-  short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.name}", "")
+  short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.region}", "")
   name               = join("-", compact([local.short_cluster_name, var.name_suffix]))
   # / is not allowd by k8s anntotations to pick up existing LB
   stack    = format("%s.%s", var.namespace, var.application)
