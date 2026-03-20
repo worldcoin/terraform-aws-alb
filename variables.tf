@@ -118,6 +118,18 @@ variable "mtls_s3_key" {
   default     = "ca_cert/RootCA.pem"
 }
 
+variable "tag_prefix" {
+  description = "Tag key prefix for LBC resource/stack tags (e.g. ingress.k8s.aws for Ingress, gateway.k8s.aws.alb for Gateway API)"
+  type        = string
+  default     = "ingress.k8s.aws"
+}
+
+variable "tag_stack" {
+  description = "Override the computed stack tag value (default: namespace.application)"
+  type        = string
+  default     = ""
+}
+
 variable "datadog" {
   description = "Datadog configuration"
   default     = null

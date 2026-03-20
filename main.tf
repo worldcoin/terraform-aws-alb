@@ -3,7 +3,7 @@ locals {
   short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.region}", "")
   name               = join("-", compact([local.short_cluster_name, var.name_suffix]))
   # / is not allowd by k8s anntotations to pick up existing LB
-  stack    = format("%s.%s", var.namespace, var.application)
+  stack    = var.tag_stack != "" ? var.tag_stack : format("%s.%s", var.namespace, var.application)
   alb_name = trimsuffix(substr(local.name, 0, 32), "-") # "name" cannot be longer than 32 characters and cannot end with "-"
 }
 
@@ -108,9 +108,9 @@ resource "aws_lb" "alb" {
   }
 
   tags = {
-    "elbv2.k8s.aws/cluster"    = var.cluster_name
-    "ingress.k8s.aws/resource" = "LoadBalancer"
-    "ingress.k8s.aws/stack"    = local.stack
+    "elbv2.k8s.aws/cluster"      = var.cluster_name
+    "${var.tag_prefix}/resource" = "LoadBalancer"
+    "${var.tag_prefix}/stack"    = local.stack
   }
 
   lifecycle {
@@ -128,9 +128,9 @@ resource "aws_lb_listener" "tls" {
   ssl_policy = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-2021-06" : "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
 
   tags = {
-    "elbv2.k8s.aws/cluster"    = var.cluster_name
-    "ingress.k8s.aws/resource" = "443"
-    "ingress.k8s.aws/stack"    = local.stack
+    "elbv2.k8s.aws/cluster"      = var.cluster_name
+    "${var.tag_prefix}/resource" = "443"
+    "${var.tag_prefix}/stack"    = local.stack
   }
 
   dynamic "mutual_authentication" {
