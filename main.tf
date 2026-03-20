@@ -94,7 +94,7 @@ resource "aws_lb" "alb" {
   ])
 
   enable_cross_zone_load_balancing = true
-  enable_deletion_protection       = true
+  enable_deletion_protection       = var.enable_deletion_protection
   idle_timeout                     = var.idle_timeout
   drop_invalid_header_fields       = var.drop_invalid_header_fields
 

@@ -100,6 +100,12 @@ variable "drop_invalid_header_fields" {
   default     = false
 }
 
+variable "enable_deletion_protection" {
+  description = "If true, deletion of the load balancer will be disabled via the AWS API"
+  type        = bool
+  default     = true
+}
+
 variable "mtls_enabled" {
   description = "Enable mutual TLS (mTLS) on the ALB TLS listener"
   type        = bool
