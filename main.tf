@@ -119,6 +119,7 @@ resource "aws_lb" "alb" {
 }
 
 resource "aws_lb_listener" "tls" {
+  count             = var.create_default_listener ? 1 : 0
   load_balancer_arn = aws_lb.alb.arn
   port              = "443"
   protocol          = "HTTPS"
@@ -158,8 +159,8 @@ resource "aws_lb_listener" "tls" {
 }
 
 resource "aws_lb_listener_certificate" "extra" {
-  count           = length(var.acm_extra_arns)
-  listener_arn    = aws_lb_listener.tls.arn
+  count           = var.create_default_listener ? length(var.acm_extra_arns) : 0
+  listener_arn    = aws_lb_listener.tls[0].arn
   certificate_arn = element(var.acm_extra_arns, count.index)
 }
 

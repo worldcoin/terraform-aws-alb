@@ -124,6 +124,12 @@ variable "mtls_s3_key" {
   default     = "ca_cert/RootCA.pem"
 }
 
+variable "create_default_listener" {
+  description = "Create the default HTTPS listener on port 443. Set to false when the listener is managed externally (e.g. by the AWS Gateway API controller)."
+  type        = bool
+  default     = true
+}
+
 variable "tag_prefix" {
   description = "Tag key prefix for LBC resource/stack tags (e.g. ingress.k8s.aws for Ingress, gateway.k8s.aws.alb for Gateway API)"
   type        = string
