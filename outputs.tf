@@ -23,10 +23,10 @@ output "sg_ids" {
 
 output "ssl_policy" {
   description = "SSL Policy attached to loadbalancer"
-  value       = aws_lb_listener.tls.ssl_policy
+  value       = var.create_default_listener ? aws_lb_listener.tls[0].ssl_policy : null
 }
 
 output "listener_arn" {
   description = "The ARN of the ALB default listener."
-  value       = aws_lb_listener.tls.arn
+  value       = var.create_default_listener ? aws_lb_listener.tls[0].arn : null
 }
