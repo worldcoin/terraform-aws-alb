@@ -13,6 +13,7 @@ resource "aws_security_group" "alb" {
   description = "SG attached to ALB exposing LB to the internet"
   vpc_id      = var.vpc_id
 
+  #trivy:ignore:aws-vpc-no-public-egress-sgr
   egress {
     from_port   = 0
     to_port     = 0
@@ -63,10 +64,11 @@ resource "aws_security_group" "alb_backend" {
   vpc_id      = var.vpc_id
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = [data.aws_vpc.current.cidr_block]
+    ipv6_cidr_blocks = data.aws_vpc.current.ipv6_cidr_block == "" ? [] : [data.aws_vpc.current.ipv6_cidr_block]
   }
 
   dynamic "ingress" {
@@ -83,6 +85,7 @@ resource "aws_security_group" "alb_backend" {
   }
 }
 
+#trivy:ignore:aws-elb-alb-not-public
 resource "aws_lb" "alb" {
   name               = local.alb_name
   internal           = var.internal
