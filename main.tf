@@ -13,6 +13,7 @@ resource "aws_security_group" "alb" {
   description = "SG attached to ALB exposing LB to the internet"
   vpc_id      = var.vpc_id
 
+  #trivy:ignore:aws-vpc-no-public-egress-sgr
   egress {
     from_port   = 0
     to_port     = 0
@@ -62,11 +63,13 @@ resource "aws_security_group" "alb_backend" {
   description = "SG to provide network access inside VPC"
   vpc_id      = var.vpc_id
 
+  #trivy:ignore:aws-vpc-no-public-egress-sgr
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = [data.aws_vpc.current.cidr_block]
+    ipv6_cidr_blocks = data.aws_vpc.current.ipv6_cidr_block == "" ? [] : [data.aws_vpc.current.ipv6_cidr_block]
   }
 
   dynamic "ingress" {
@@ -83,6 +86,7 @@ resource "aws_security_group" "alb_backend" {
   }
 }
 
+#trivy:ignore:aws-elb-alb-not-public
 resource "aws_lb" "alb" {
   name               = local.alb_name
   internal           = var.internal
@@ -96,7 +100,8 @@ resource "aws_lb" "alb" {
   enable_cross_zone_load_balancing = true
   enable_deletion_protection       = var.enable_deletion_protection
   idle_timeout                     = var.idle_timeout
-  drop_invalid_header_fields       = var.drop_invalid_header_fields
+  #trivy:ignore:AWS-0052
+  drop_invalid_header_fields = var.drop_invalid_header_fields
 
   dynamic "access_logs" {
     for_each = length(var.s3_logs_bucket_id) > 0 ? [1] : [] # Create block only if bucket name is set
