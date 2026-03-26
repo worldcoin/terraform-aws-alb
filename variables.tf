@@ -142,6 +142,12 @@ variable "tag_stack" {
   default     = ""
 }
 
+variable "cluster_tag" {
+  description = "Value for the elbv2.k8s.aws/cluster tag. Defaults to cluster_name. Use when the tag must differ from the name used to construct the LB name (e.g. Gateway API where the LB name prefix is trimmed but the tag must match the LBC --cluster-name)."
+  type        = string
+  default     = ""
+}
+
 variable "datadog" {
   description = "Datadog configuration"
   default     = null
