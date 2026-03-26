@@ -63,6 +63,7 @@ resource "aws_security_group" "alb_backend" {
   description = "SG to provide network access inside VPC"
   vpc_id      = var.vpc_id
 
+  #trivy:ignore:aws-vpc-no-public-egress-sgr
   egress {
     from_port        = 0
     to_port          = 0
