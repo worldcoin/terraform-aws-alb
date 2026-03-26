@@ -3,8 +3,9 @@ locals {
   short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.region}", "")
   name               = join("-", compact([local.short_cluster_name, var.name_suffix]))
   # / is not allowd by k8s anntotations to pick up existing LB
-  stack    = var.tag_stack != "" ? var.tag_stack : format("%s.%s", var.namespace, var.application)
-  alb_name = trimsuffix(substr(local.name, 0, 32), "-") # "name" cannot be longer than 32 characters and cannot end with "-"
+  stack       = var.tag_stack != "" ? var.tag_stack : format("%s.%s", var.namespace, var.application)
+  alb_name    = trimsuffix(substr(local.name, 0, 32), "-") # "name" cannot be longer than 32 characters and cannot end with "-"
+  cluster_tag = var.cluster_tag != "" ? var.cluster_tag : var.cluster_name
 }
 
 resource "aws_security_group" "alb" {
@@ -113,7 +114,7 @@ resource "aws_lb" "alb" {
   }
 
   tags = {
-    "elbv2.k8s.aws/cluster"      = var.cluster_name
+    "elbv2.k8s.aws/cluster"      = local.cluster_tag
     "${var.tag_prefix}/resource" = "LoadBalancer"
     "${var.tag_prefix}/stack"    = local.stack
   }
@@ -134,7 +135,7 @@ resource "aws_lb_listener" "tls" {
   ssl_policy = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-2021-06" : "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
 
   tags = {
-    "elbv2.k8s.aws/cluster"      = var.cluster_name
+    "elbv2.k8s.aws/cluster"      = local.cluster_tag
     "${var.tag_prefix}/resource" = "443"
     "${var.tag_prefix}/stack"    = local.stack
   }
