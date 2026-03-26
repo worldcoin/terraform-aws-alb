@@ -94,6 +94,7 @@ variable "open_to_all" {
   default     = false
 }
 
+#trivy:ignore:AWS-0052
 variable "drop_invalid_header_fields" {
   description = "Drop invalid header fields"
   type        = bool
