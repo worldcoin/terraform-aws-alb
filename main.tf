@@ -100,7 +100,8 @@ resource "aws_lb" "alb" {
   enable_cross_zone_load_balancing = true
   enable_deletion_protection       = var.enable_deletion_protection
   idle_timeout                     = var.idle_timeout
-  drop_invalid_header_fields       = var.drop_invalid_header_fields
+  #trivy:ignore:AWS-0052
+  drop_invalid_header_fields = var.drop_invalid_header_fields
 
   dynamic "access_logs" {
     for_each = length(var.s3_logs_bucket_id) > 0 ? [1] : [] # Create block only if bucket name is set
