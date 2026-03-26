@@ -100,6 +100,12 @@ variable "drop_invalid_header_fields" {
   default     = true
 }
 
+variable "enable_deletion_protection" {
+  description = "If true, deletion of the load balancer will be disabled via the AWS API"
+  type        = bool
+  default     = true
+}
+
 variable "mtls_enabled" {
   description = "Enable mutual TLS (mTLS) on the ALB TLS listener"
   type        = bool
@@ -116,6 +122,12 @@ variable "mtls_s3_key" {
   description = "S3 key where the CA certificates for mTLS are stored"
   type        = string
   default     = "ca_cert/RootCA.pem"
+}
+
+variable "create_default_listener" {
+  description = "Create the default HTTPS listener on port 443. Set to false when the listener is managed externally (e.g. by the AWS Gateway API controller)."
+  type        = bool
+  default     = true
 }
 
 variable "tag_prefix" {

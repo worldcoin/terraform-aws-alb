@@ -97,7 +97,7 @@ resource "aws_lb" "alb" {
   ])
 
   enable_cross_zone_load_balancing = true
-  enable_deletion_protection       = true
+  enable_deletion_protection       = var.enable_deletion_protection
   idle_timeout                     = var.idle_timeout
   drop_invalid_header_fields       = var.drop_invalid_header_fields
 
@@ -122,6 +122,7 @@ resource "aws_lb" "alb" {
 }
 
 resource "aws_lb_listener" "tls" {
+  count             = var.create_default_listener ? 1 : 0
   load_balancer_arn = aws_lb.alb.arn
   port              = "443"
   protocol          = "HTTPS"
@@ -161,8 +162,8 @@ resource "aws_lb_listener" "tls" {
 }
 
 resource "aws_lb_listener_certificate" "extra" {
-  count           = length(var.acm_extra_arns)
-  listener_arn    = aws_lb_listener.tls.arn
+  count           = var.create_default_listener ? length(var.acm_extra_arns) : 0
+  listener_arn    = aws_lb_listener.tls[0].arn
   certificate_arn = element(var.acm_extra_arns, count.index)
 }
 
