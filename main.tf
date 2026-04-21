@@ -160,6 +160,10 @@ resource "aws_lb_listener" "tls" {
   }
 
   lifecycle {
+    precondition {
+      condition     = var.acm_arn != null
+      error_message = "acm_arn is required when create_default_listener is true."
+    }
     ignore_changes = [tags_all]
   }
 }
