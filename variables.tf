@@ -14,8 +14,13 @@ variable "namespace" {
 }
 
 variable "acm_arn" {
-  description = "ARN for ACM certificate used for TLS"
+  description = "ARN for ACM certificate used for TLS. Required when create_default_listener is true."
   type        = string
+  default     = null
+  validation {
+    condition     = var.acm_arn == null || can(regex("^arn:aws:acm:[a-z][a-z]-[a-z]+-[1-9]:\\d{12}:certificate/[A-Za-z0-9\\-]+$", var.acm_arn))
+    error_message = "Invalid ACM ARN"
+  }
 }
 
 variable "acm_extra_arns" {
