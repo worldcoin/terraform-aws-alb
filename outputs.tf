@@ -30,3 +30,8 @@ output "listener_arn" {
   description = "The ARN of the ALB default listener."
   value       = var.create_default_listener ? aws_lb_listener.tls[0].arn : null
 }
+
+output "trust_store_arn" {
+  description = "The ARN of the mTLS trust store."
+  value       = var.mtls_enabled ? aws_lb_trust_store.root_ca[0].arn : null
+}
