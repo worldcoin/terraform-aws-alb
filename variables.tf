@@ -111,6 +111,12 @@ variable "enable_deletion_protection" {
   default     = true
 }
 
+variable "enable_cross_zone_load_balancing" {
+  description = "If true, cross-zone load balancing is enabled at the load-balancer level. AWS always enables cross-zone for Application Load Balancers at the LB level; this attribute on `aws_lb` is provided for API parity and may be ignored by AWS. To actually disable cross-zone for an ALB, set `load_balancing_cross_zone_enabled = false` at the target-group level (separate concern; not handled by this module). Default true matches AWS behavior."
+  type        = bool
+  default     = true
+}
+
 variable "mtls_enabled" {
   description = "Enable mutual TLS (mTLS) on the ALB TLS listener"
   type        = bool

@@ -98,7 +98,7 @@ resource "aws_lb" "alb" {
     aws_security_group.alb_backend.id
   ])
 
-  enable_cross_zone_load_balancing = true
+  enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
   enable_deletion_protection       = var.enable_deletion_protection
   idle_timeout                     = var.idle_timeout
   #trivy:ignore:AWS-0052
