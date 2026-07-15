@@ -51,6 +51,42 @@ You can override default rules using `waf_rules`
 WAF rules are defined as default, if you want to add custom managed WAF rules you need to create your own file due to restrictions in creation of custom rules.
 If you create your own WAF resource you need to deattach WAF rules created in this module.
 
+## Lambda backend
+
+Attach one or more Lambda functions behind the ALB's default TLS listener via
+`lambda_targets` (requires `create_default_listener = true`). Each entry creates a
+lambda target group, the ELB invoke permission, the attachment, and a listener rule
+matching the given host/path conditions. Useful for exposing a Lambda through the
+same Cloudflare-fronted, IP-restricted, mTLS ALB used for cluster services.
+
+```terraform
+module "alb" {
+  source = "github.com/worldcoin/terraform-aws-alb?ref=v1.7.0"
+
+  cluster_name = var.name
+  application  = "token-chatbot"
+  namespace    = "token-chatbot"
+  ingress_name = "token-chatbot"
+  internal     = false
+
+  acm_arn        = var.acm_arn
+  vpc_id         = var.vpc_config.vpc_id
+  public_subnets = var.vpc_config.public_subnets
+
+  lambda_targets = {
+    token-chatbot = {
+      function_arn = aws_lambda_function.token_chatbot.arn
+      priority     = 100
+      host_headers = ["token-chatbot.dev.worldcoin.dev"]
+      # path_patterns = ["/slack/*"]  # optional; set host and/or path
+    }
+  }
+}
+```
+
+The Lambda handler receives the ALB event shape (`requestContext.elb`, `headers` /
+`multiValueHeaders`, base64 body) and must return `{statusCode, statusDescription,
+headers, body, isBase64Encoded}`.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -66,9 +102,9 @@ If you create your own WAF resource you need to deattach WAF rules created in th
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.14.0 |
-| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | >= 5.8 |
-| <a name="provider_datadog"></a> [datadog](#provider\_datadog) | >= 3.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.54.0 |
+| <a name="provider_cloudflare"></a> [cloudflare](#provider\_cloudflare) | 5.22.0 |
+| <a name="provider_datadog"></a> [datadog](#provider\_datadog) | 4.15.0 |
 
 ## Modules
 
@@ -78,9 +114,13 @@ No modules.
 
 | Name | Type |
 | ---- | ---- |
+| [aws_lambda_permission.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_lb.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
 | [aws_lb_listener.tls](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
 | [aws_lb_listener_certificate.extra](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_certificate) | resource |
+| [aws_lb_listener_rule.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule) | resource |
+| [aws_lb_target_group.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
+| [aws_lb_target_group_attachment.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group_attachment) | resource |
 | [aws_lb_trust_store.root_ca](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_trust_store) | resource |
 | [aws_security_group.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.alb_backend](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
@@ -106,6 +146,7 @@ No modules.
 | <a name="input_enable_deletion_protection"></a> [enable\_deletion\_protection](#input\_enable\_deletion\_protection) | If true, deletion of the load balancer will be disabled via the AWS API | `bool` | `true` | no |
 | <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | The time in seconds that the connection is allowed to be idle | `number` | `60` | no |
 | <a name="input_internal"></a> [internal](#input\_internal) | Set NLB to be internal (available only within VPC) | `bool` | n/a | yes |
+| <a name="input_lambda_targets"></a> [lambda\_targets](#input\_lambda\_targets) | Optional Lambda backends attached to the default TLS listener. Each entry creates a lambda target group, an ELB invoke permission, a target attachment, and a listener rule matching the given host/path conditions. Requires create\_default\_listener = true. | <pre>map(object({<br/>    function_arn  = string<br/>    priority      = number<br/>    path_patterns = optional(list(string))<br/>    host_headers  = optional(list(string))<br/>  }))</pre> | `{}` | no |
 | <a name="input_mtls_enabled"></a> [mtls\_enabled](#input\_mtls\_enabled) | Enable mutual TLS (mTLS) on the ALB TLS listener | `bool` | `true` | no |
 | <a name="input_mtls_s3_bucket"></a> [mtls\_s3\_bucket](#input\_mtls\_s3\_bucket) | S3 bucket where the CA certificates for mTLS are stored | `string` | `"wld-mtls-ca-us-east-1"` | no |
 | <a name="input_mtls_s3_key"></a> [mtls\_s3\_key](#input\_mtls\_s3\_key) | S3 key where the CA certificates for mTLS are stored | `string` | `"ca_cert/RootCA.pem"` | no |
@@ -125,6 +166,7 @@ No modules.
 | ---- | ----------- |
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the NLB. |
 | <a name="output_dns_name"></a> [dns\_name](#output\_dns\_name) | The DNS name of the NLB. |
+| <a name="output_lambda_target_group_arns"></a> [lambda\_target\_group\_arns](#output\_lambda\_target\_group\_arns) | Map of lambda\_targets keys to their target group ARNs. |
 | <a name="output_listener_arn"></a> [listener\_arn](#output\_listener\_arn) | The ARN of the ALB default listener. |
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security Group attached to loadbalancer |
 | <a name="output_ssl_policy"></a> [ssl\_policy](#output\_ssl\_policy) | SSL Policy attached to loadbalancer |

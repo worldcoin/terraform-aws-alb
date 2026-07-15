@@ -35,3 +35,8 @@ output "trust_store_arn" {
   description = "The ARN of the mTLS trust store."
   value       = var.mtls_enabled ? aws_lb_trust_store.root_ca[0].arn : null
 }
+
+output "lambda_target_group_arns" {
+  description = "Map of lambda_targets keys to their target group ARNs."
+  value       = { for k, tg in aws_lb_target_group.lambda : k => tg.arn }
+}

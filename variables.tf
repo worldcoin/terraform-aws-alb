@@ -161,3 +161,22 @@ variable "datadog" {
     client_tls_negotiation_threshold = optional(number, 5)
   })
 }
+
+variable "lambda_targets" {
+  description = "Optional Lambda backends attached to the default TLS listener. Each entry creates a lambda target group, an ELB invoke permission, a target attachment, and a listener rule matching the given host/path conditions. Requires create_default_listener = true."
+  type = map(object({
+    function_arn  = string
+    priority      = number
+    path_patterns = optional(list(string))
+    host_headers  = optional(list(string))
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for t in values(var.lambda_targets) :
+      length(coalesce(t.path_patterns, [])) > 0 || length(coalesce(t.host_headers, [])) > 0
+    ])
+    error_message = "Each lambda_targets entry must set at least one of path_patterns or host_headers (a listener rule requires a condition)."
+  }
+}
