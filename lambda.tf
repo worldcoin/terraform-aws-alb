@@ -7,7 +7,9 @@
 resource "aws_lb_target_group" "lambda" {
   for_each = var.lambda_targets
 
-  name        = trimsuffix(substr("${local.alb_name}-${each.key}", 0, 32), "-")
+  # TG names are capped at 32 chars and must be unique. Truncate the (possibly long)
+  # cluster-derived prefix, not the per-target key, so distinct keys never collide.
+  name        = trimsuffix(substr("${substr(local.alb_name, 0, 20)}-${each.key}", 0, 32), "-")
   target_type = "lambda"
 
   tags = {

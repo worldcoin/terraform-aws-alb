@@ -61,7 +61,7 @@ same Cloudflare-fronted, IP-restricted, mTLS ALB used for cluster services.
 
 ```terraform
 module "alb" {
-  source = "github.com/worldcoin/terraform-aws-alb?ref=v1.7.0"
+  source = "github.com/worldcoin/terraform-aws-alb?ref=v1.7.0" # or later — first tag that includes lambda_targets
 
   cluster_name = var.name
   application  = "token-chatbot"
