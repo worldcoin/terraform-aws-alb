@@ -113,11 +113,14 @@ resource "aws_lb" "alb" {
     }
   }
 
-  tags = merge({
+  # An empty-string value (default or from var.tags) omits that key entirely, rather
+  # than tagging the LB with a blank value - merge() alone can only override a key's
+  # value, never remove it.
+  tags = { for k, v in merge({
     "elbv2.k8s.aws/cluster"      = local.cluster_tag
     "${var.tag_prefix}/resource" = "LoadBalancer"
     "${var.tag_prefix}/stack"    = local.stack
-  }, var.tags)
+  }, var.tags) : k => v if v != "" }
 
   lifecycle {
     ignore_changes = [tags_all]
@@ -134,11 +137,11 @@ resource "aws_lb_listener" "tls" {
 
   ssl_policy = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-2021-06" : "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
 
-  tags = merge({
+  tags = { for k, v in merge({
     "elbv2.k8s.aws/cluster"      = local.cluster_tag
     "${var.tag_prefix}/resource" = "443"
     "${var.tag_prefix}/stack"    = local.stack
-  }, var.tags)
+  }, var.tags) : k => v if v != "" }
 
   dynamic "mutual_authentication" {
     for_each = var.mtls_enabled ? [1] : []

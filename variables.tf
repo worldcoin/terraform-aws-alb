@@ -154,9 +154,10 @@ variable "cluster_tag" {
 }
 
 variable "tags" {
-  description = "Extra tags for the ALB and its default listener, merged over this module's default tags (elbv2.k8s.aws/cluster, <tag_prefix>/resource, <tag_prefix>/stack). A key here overrides that default's value - e.g. set \"elbv2.k8s.aws/cluster\" = \"\" when this ALB isn't managed by an EKS AWS Load Balancer Controller."
+  description = "Extra tags for the ALB and its default listener, merged over this module's default tags (`elbv2.k8s.aws/cluster`, `<tag_prefix>/resource`, `<tag_prefix>/stack`). A key here overrides that default's value, and a value of \"\" omits that tag entirely - e.g. set \"elbv2.k8s.aws/cluster\" = \"\" when this ALB isn't managed by an EKS AWS Load Balancer Controller."
   type        = map(string)
   default     = {}
+  nullable    = false
 }
 
 variable "datadog" {

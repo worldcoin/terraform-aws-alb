@@ -33,7 +33,7 @@ run "default_tags" {
   }
 }
 
-run "override_removes_default_cluster_tag_value" {
+run "override_omits_default_cluster_tag_key" {
   command = plan
 
   variables {
@@ -43,8 +43,8 @@ run "override_removes_default_cluster_tag_value" {
   }
 
   assert {
-    condition     = aws_lb.alb.tags["elbv2.k8s.aws/cluster"] == ""
-    error_message = "var.tags should override the default elbv2.k8s.aws/cluster value"
+    condition     = !contains(keys(aws_lb.alb.tags), "elbv2.k8s.aws/cluster")
+    error_message = "Setting var.tags[\"elbv2.k8s.aws/cluster\"] to \"\" should omit the key entirely, not just blank its value"
   }
 
   assert {
@@ -53,8 +53,21 @@ run "override_removes_default_cluster_tag_value" {
   }
 
   assert {
-    condition     = aws_lb_listener.tls[0].tags["elbv2.k8s.aws/cluster"] == ""
-    error_message = "Listener's cluster tag should also be overridden"
+    condition     = !contains(keys(aws_lb_listener.tls[0].tags), "elbv2.k8s.aws/cluster")
+    error_message = "Listener's cluster tag key should also be omitted"
+  }
+}
+
+run "null_tags_falls_back_to_defaults" {
+  command = plan
+
+  variables {
+    tags = null
+  }
+
+  assert {
+    condition     = aws_lb.alb.tags["elbv2.k8s.aws/cluster"] == var.cluster_name
+    error_message = "nullable = false should substitute the default {} when var.tags is null, not error or drop the defaults"
   }
 }
 
