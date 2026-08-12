@@ -113,11 +113,11 @@ resource "aws_lb" "alb" {
     }
   }
 
-  tags = {
+  tags = merge({
     "elbv2.k8s.aws/cluster"      = local.cluster_tag
     "${var.tag_prefix}/resource" = "LoadBalancer"
     "${var.tag_prefix}/stack"    = local.stack
-  }
+  }, var.tags)
 
   lifecycle {
     ignore_changes = [tags_all]
@@ -134,11 +134,11 @@ resource "aws_lb_listener" "tls" {
 
   ssl_policy = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-2021-06" : "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
 
-  tags = {
+  tags = merge({
     "elbv2.k8s.aws/cluster"      = local.cluster_tag
     "${var.tag_prefix}/resource" = "443"
     "${var.tag_prefix}/stack"    = local.stack
-  }
+  }, var.tags)
 
   dynamic "mutual_authentication" {
     for_each = var.mtls_enabled ? [1] : []

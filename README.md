@@ -116,6 +116,7 @@ No modules.
 | <a name="input_s3_logs_bucket_id"></a> [s3\_logs\_bucket\_id](#input\_s3\_logs\_bucket\_id) | The ID of S3 bucket where the ALB logs will be stored, enables logging if set | `string` | `null` | no |
 | <a name="input_tag_prefix"></a> [tag\_prefix](#input\_tag\_prefix) | Tag key prefix for LBC resource/stack tags (e.g. ingress.k8s.aws for Ingress, gateway.k8s.aws.alb for Gateway API) | `string` | `"ingress.k8s.aws"` | no |
 | <a name="input_tag_stack"></a> [tag\_stack](#input\_tag\_stack) | Override the computed stack tag value (default: namespace.application) | `string` | `""` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Extra tags for the ALB and its default listener, merged over this module's default tags (elbv2.k8s.aws/cluster, <tag\_prefix>/resource, <tag\_prefix>/stack). A key here overrides that default's value - e.g. set "elbv2.k8s.aws/cluster" = "" when this ALB isn't managed by an EKS AWS Load Balancer Controller. | `map(string)` | `{}` | no |
 | <a name="input_tls_listener_version"></a> [tls\_listener\_version](#input\_tls\_listener\_version) | Minimum TLS version served by TLS listener | `string` | `"1.3"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID where the NLB will be deployed | `string` | n/a | yes |
 
