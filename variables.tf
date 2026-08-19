@@ -135,6 +135,13 @@ variable "create_default_listener" {
   default     = true
 }
 
+variable "tags" {
+  description = "Tags for the ALB and its default listener. If non-empty, these fully replace the module's default tags (`elbv2.k8s.aws/cluster`, `<tag_prefix>/resource`, `<tag_prefix>/stack`) instead of merging with them - use this for an ALB that must not be tracked/managed by an EKS AWS Load Balancer Controller (e.g. a Lambda-backed ALB)."
+  type        = map(string)
+  default     = {}
+  nullable    = false
+}
+
 variable "tag_prefix" {
   description = "Tag key prefix for LBC resource/stack tags (e.g. ingress.k8s.aws for Ingress, gateway.k8s.aws.alb for Gateway API)"
   type        = string
