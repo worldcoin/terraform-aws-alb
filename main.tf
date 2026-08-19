@@ -113,7 +113,9 @@ resource "aws_lb" "alb" {
     }
   }
 
-  tags = {
+  # var.tags fully replaces (not merges with) these LBC/monitoring defaults, so a
+  # non-cluster ALB can drop elbv2.k8s.aws/cluster entirely instead of just blanking it.
+  tags = length(var.tags) > 0 ? var.tags : {
     "elbv2.k8s.aws/cluster"      = local.cluster_tag
     "${var.tag_prefix}/resource" = "LoadBalancer"
     "${var.tag_prefix}/stack"    = local.stack
@@ -134,7 +136,8 @@ resource "aws_lb_listener" "tls" {
 
   ssl_policy = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-2021-06" : "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
 
-  tags = {
+  # Same full-replace semantics as aws_lb.alb.tags above.
+  tags = length(var.tags) > 0 ? var.tags : {
     "elbv2.k8s.aws/cluster"      = local.cluster_tag
     "${var.tag_prefix}/resource" = "443"
     "${var.tag_prefix}/stack"    = local.stack
