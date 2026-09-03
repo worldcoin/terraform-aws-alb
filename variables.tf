@@ -99,6 +99,23 @@ variable "open_to_all" {
   default     = false
 }
 
+variable "frontend_ingress_cidrs" {
+  description = "Explicit IPv4 CIDR allowlist for the frontend (internet-facing) security group. When non-empty, replaces the default sources (Cloudflare IPs, or 0.0.0.0/0 with open_to_all) on port 443 and additional_open_ports, and opens no IPv6 sources. External ALBs only."
+  type        = list(string)
+  default     = []
+  nullable    = false
+
+  validation {
+    condition     = alltrue([for cidr in var.frontend_ingress_cidrs : can(cidrnetmask(cidr))])
+    error_message = "All frontend ingress CIDRs must be valid IPv4 CIDR blocks."
+  }
+
+  validation {
+    condition     = !(var.open_to_all && length(var.frontend_ingress_cidrs) > 0)
+    error_message = "frontend_ingress_cidrs and open_to_all are mutually exclusive."
+  }
+}
+
 variable "drop_invalid_header_fields" {
   description = "Drop invalid header fields"
   type        = bool

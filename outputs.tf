@@ -35,3 +35,8 @@ output "trust_store_arn" {
   description = "The ARN of the mTLS trust store."
   value       = var.mtls_enabled ? aws_lb_trust_store.root_ca[0].arn : null
 }
+
+output "frontend_security_group_ingress" {
+  description = "Ingress rules of the frontend (internet) SG; empty for internal ALBs. Lets callers assert on the effective sources."
+  value       = var.internal ? [] : aws_security_group.alb[0].ingress
+}

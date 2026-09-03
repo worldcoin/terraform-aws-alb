@@ -6,6 +6,11 @@ locals {
   stack       = var.tag_stack != "" ? var.tag_stack : format("%s.%s", var.namespace, var.application)
   alb_name    = trimsuffix(substr(local.name, 0, 32), "-") # "name" cannot be longer than 32 characters and cannot end with "-"
   cluster_tag = var.cluster_tag != "" ? var.cluster_tag : var.cluster_name
+
+  # Frontend SG sources: an explicit allowlist wins over the Cloudflare/open-to-all defaults.
+  # An allowlist opens no IPv6 sources, so the IPv6 ingress blocks are skipped entirely.
+  frontend_ingress_ipv4 = length(var.frontend_ingress_cidrs) > 0 ? var.frontend_ingress_cidrs : (var.open_to_all ? ["0.0.0.0/0"] : data.cloudflare_ip_ranges.cloudflare.ipv4_cidrs)
+  frontend_ingress_ipv6 = length(var.frontend_ingress_cidrs) > 0 ? [] : (var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidrs)
 }
 
 resource "aws_security_group" "alb" {
@@ -26,14 +31,18 @@ resource "aws_security_group" "alb" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = var.open_to_all ? ["0.0.0.0/0"] : data.cloudflare_ip_ranges.cloudflare.ipv4_cidrs
+    cidr_blocks = local.frontend_ingress_ipv4
   }
 
-  ingress {
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    ipv6_cidr_blocks = var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidrs
+  dynamic "ingress" {
+    for_each = length(local.frontend_ingress_ipv6) > 0 ? [1] : []
+
+    content {
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      ipv6_cidr_blocks = local.frontend_ingress_ipv6
+    }
   }
 
   dynamic "ingress" {
@@ -43,18 +52,18 @@ resource "aws_security_group" "alb" {
       from_port   = ingress.value["port"]
       to_port     = ingress.value["port"]
       protocol    = ingress.value["protocol"]
-      cidr_blocks = var.open_to_all ? ["0.0.0.0/0"] : data.cloudflare_ip_ranges.cloudflare.ipv4_cidrs
+      cidr_blocks = local.frontend_ingress_ipv4
     }
   }
 
   dynamic "ingress" {
-    for_each = var.additional_open_ports
+    for_each = length(local.frontend_ingress_ipv6) > 0 ? var.additional_open_ports : []
 
     content {
       from_port        = ingress.value["port"]
       to_port          = ingress.value["port"]
       protocol         = ingress.value["protocol"]
-      ipv6_cidr_blocks = var.open_to_all ? ["::/0"] : data.cloudflare_ip_ranges.cloudflare.ipv6_cidrs
+      ipv6_cidr_blocks = local.frontend_ingress_ipv6
     }
   }
 }
