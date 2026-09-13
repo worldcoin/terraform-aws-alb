@@ -78,3 +78,12 @@ run "cluster_tag_variable_still_feeds_the_default" {
     error_message = "var.cluster_tag should still set the default elbv2.k8s.aws/cluster value when var.tags is empty"
   }
 }
+
+run "backend_egress_includes_vpc_ipv6_cidr_associations" {
+  command = plan
+
+  assert {
+    condition     = toset(one(aws_security_group.alb_backend.egress).ipv6_cidr_blocks) == toset(["2600:1f14:abcd:1000::/56", "2600:1f14:abcd:2000::/56"])
+    error_message = "Backend egress should include every IPv6 CIDR associated with the VPC"
+  }
+}

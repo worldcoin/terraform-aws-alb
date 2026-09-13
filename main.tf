@@ -70,7 +70,7 @@ resource "aws_security_group" "alb_backend" {
     to_port          = 0
     protocol         = "-1"
     cidr_blocks      = [data.aws_vpc.current.cidr_block]
-    ipv6_cidr_blocks = data.aws_vpc.current.ipv6_cidr_block == "" ? [] : [data.aws_vpc.current.ipv6_cidr_block]
+    ipv6_cidr_blocks = [for association in data.aws_vpc.current.ipv6_cidr_block_associations : association.ipv6_cidr_block]
   }
 
   dynamic "ingress" {
