@@ -77,12 +77,13 @@ resource "aws_security_group" "alb_backend" {
     for_each = var.backend_ingress_rules
 
     content {
-      description     = ingress.value["description"]
-      from_port       = ingress.value["port"]
-      to_port         = ingress.value["port"]
-      protocol        = ingress.value["protocol"]
-      security_groups = ingress.value["security_groups"]
-      cidr_blocks     = ingress.value["cidr_blocks"]
+      description      = ingress.value["description"]
+      from_port        = ingress.value["port"]
+      to_port          = ingress.value["port"]
+      protocol         = ingress.value["protocol"]
+      security_groups  = ingress.value["security_groups"]
+      cidr_blocks      = ingress.value["cidr_blocks"]
+      ipv6_cidr_blocks = ingress.value["ipv6_cidr_blocks"]
     }
   }
 }
