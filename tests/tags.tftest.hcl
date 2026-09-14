@@ -83,8 +83,13 @@ run "backend_egress_includes_vpc_ipv6_cidr_associations" {
   command = plan
 
   assert {
+    condition     = local.vpc_ipv6_cidr_blocks == tolist(["2600:1f14:abcd:1000::/56", "2600:1f14:abcd:2000::/56"])
+    error_message = "Backend egress should include active VPC IPv6 CIDRs in deterministic order"
+  }
+
+  assert {
     condition     = toset(one(aws_security_group.alb_backend.egress).ipv6_cidr_blocks) == toset(["2600:1f14:abcd:1000::/56", "2600:1f14:abcd:2000::/56"])
-    error_message = "Backend egress should include every IPv6 CIDR associated with the VPC"
+    error_message = "Backend egress should exclude inactive VPC IPv6 CIDR associations"
   }
 }
 

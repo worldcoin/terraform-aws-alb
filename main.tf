@@ -1,4 +1,6 @@
 locals {
+  vpc_ipv6_cidr_blocks = sort([for association in data.aws_vpc.current.ipv6_cidr_block_associations : association.ipv6_cidr_block if association.state == "associated"])
+
   # cluter name without region
   short_cluster_name = replace(var.cluster_name, "-${data.aws_region.current.region}", "")
   name               = join("-", compact([local.short_cluster_name, var.name_suffix]))
@@ -70,7 +72,7 @@ resource "aws_security_group" "alb_backend" {
     to_port          = 0
     protocol         = "-1"
     cidr_blocks      = [data.aws_vpc.current.cidr_block]
-    ipv6_cidr_blocks = [for association in data.aws_vpc.current.ipv6_cidr_block_associations : association.ipv6_cidr_block]
+    ipv6_cidr_blocks = local.vpc_ipv6_cidr_blocks
   }
 
   dynamic "ingress" {
