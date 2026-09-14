@@ -104,3 +104,28 @@ run "backend_ingress_accepts_ipv6_cidr_blocks" {
     error_message = "Backend ingress rules should forward IPv6 CIDR blocks to the security group"
   }
 }
+
+run "backend_ingress_allows_omitted_ipv6_cidr_blocks" {
+  command = plan
+
+  variables {
+    backend_ingress_rules = [
+      {
+        description = "Allow HTTPS from IPv4"
+        port        = 443
+        cidr_blocks = ["10.0.0.0/8"]
+      },
+      {
+        description      = "Allow HTTPS from security group"
+        port             = 443
+        security_groups  = ["sg-0123456789abcdef0"]
+        ipv6_cidr_blocks = null
+      },
+    ]
+  }
+
+  assert {
+    condition     = alltrue([for ingress in aws_security_group.alb_backend.ingress : ingress.description == "Allow HTTPS from IPv4" || ingress.description == "Allow HTTPS from security group" ? ingress.ipv6_cidr_blocks == null : true])
+    error_message = "Existing backend ingress rules should work when IPv6 CIDR blocks are omitted or null"
+  }
+}
