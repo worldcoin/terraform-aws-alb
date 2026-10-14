@@ -18,6 +18,7 @@ resource "aws_security_group" "alb" {
 
   #trivy:ignore:aws-vpc-no-public-egress-sgr
   egress {
+    description = "Allow outbound traffic to any IPv4 address"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -25,6 +26,7 @@ resource "aws_security_group" "alb" {
   }
 
   ingress {
+    description = var.open_to_all ? "Allow HTTPS from any IPv4 address" : "Allow HTTPS from Cloudflare IPv4 ranges"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -32,6 +34,7 @@ resource "aws_security_group" "alb" {
   }
 
   ingress {
+    description      = var.open_to_all ? "Allow HTTPS from any IPv6 address" : "Allow HTTPS from Cloudflare IPv6 ranges"
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
@@ -42,6 +45,7 @@ resource "aws_security_group" "alb" {
     for_each = var.additional_open_ports
 
     content {
+      description = format("Allow %s/%d from %s", upper(ingress.value["protocol"]), ingress.value["port"], var.open_to_all ? "any IPv4 address" : "Cloudflare IPv4 ranges")
       from_port   = ingress.value["port"]
       to_port     = ingress.value["port"]
       protocol    = ingress.value["protocol"]
@@ -53,6 +57,7 @@ resource "aws_security_group" "alb" {
     for_each = var.additional_open_ports
 
     content {
+      description      = format("Allow %s/%d from %s", upper(ingress.value["protocol"]), ingress.value["port"], var.open_to_all ? "any IPv6 address" : "Cloudflare IPv6 ranges")
       from_port        = ingress.value["port"]
       to_port          = ingress.value["port"]
       protocol         = ingress.value["protocol"]
@@ -68,6 +73,7 @@ resource "aws_security_group" "alb_backend" {
 
   #trivy:ignore:aws-vpc-no-public-egress-sgr
   egress {
+    description      = "Allow outbound traffic within the VPC"
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
@@ -79,7 +85,7 @@ resource "aws_security_group" "alb_backend" {
     for_each = var.backend_ingress_rules
 
     content {
-      description      = ingress.value["description"]
+      description      = coalesce(ingress.value["description"], format("Allow %s/%d to ALB", upper(ingress.value["protocol"]), ingress.value["port"]))
       from_port        = ingress.value["port"]
       to_port          = ingress.value["port"]
       protocol         = ingress.value["protocol"]
