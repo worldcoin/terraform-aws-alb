@@ -134,3 +134,56 @@ run "backend_ingress_allows_omitted_ipv6_cidr_blocks" {
     error_message = "Existing backend ingress rules should work when IPv6 CIDR blocks are omitted or null"
   }
 }
+
+run "security_group_rules_have_descriptions" {
+  command = plan
+
+  variables {
+    additional_open_ports = [{ port = 80 }]
+    backend_ingress_rules = [
+      {
+        port        = 8443
+        cidr_blocks = ["10.0.0.0/16"]
+      },
+      {
+        description = "Allow health checks"
+        port        = 8080
+        cidr_blocks = ["10.0.0.0/16"]
+      },
+    ]
+  }
+
+  assert {
+    condition = alltrue(concat(
+      [for rule in aws_security_group.alb[0].ingress : length(trimspace(rule.description)) > 0],
+      [for rule in aws_security_group.alb[0].egress : length(trimspace(rule.description)) > 0],
+      [for rule in aws_security_group.alb_backend.ingress : length(trimspace(rule.description)) > 0],
+      [for rule in aws_security_group.alb_backend.egress : length(trimspace(rule.description)) > 0],
+    ))
+    error_message = "Every ALB security group rule should have a description"
+  }
+
+  assert {
+    condition     = one([for rule in aws_security_group.alb_backend.ingress : rule.description if rule.from_port == 8443]) == "Allow TCP/8443 to ALB"
+    error_message = "Backend rules without a caller description should receive a useful default"
+  }
+
+  assert {
+    condition     = one([for rule in aws_security_group.alb_backend.ingress : rule.description if rule.from_port == 8080]) == "Allow health checks"
+    error_message = "Caller-provided backend rule descriptions should be preserved"
+  }
+}
+
+run "public_ingress_descriptions_reflect_open_source" {
+  command = plan
+
+  variables {
+    open_to_all           = true
+    additional_open_ports = [{ port = 80 }]
+  }
+
+  assert {
+    condition     = alltrue([for rule in aws_security_group.alb[0].ingress : strcontains(rule.description, "any IPv")])
+    error_message = "Public ingress descriptions should identify their open IPv4 or IPv6 source"
+  }
+}
