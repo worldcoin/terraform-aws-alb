@@ -37,6 +37,18 @@ module "alb" {
 }
 ```
 
+## Internet security group egress
+
+`internet_egress_sg_rules` replaces the internet-facing SG's outbound rules.
+Omitting it or passing `null` preserves unrestricted IPv4 egress. Set it to `[]`
+to revoke that egress and rely on the attached backend SG's VPC IPv4 and IPv6
+egress. Internal ALBs have no internet SG and are unaffected.
+
+Before restricting egress, verify target and health-check destinations, secondary
+VPC CIDRs, cross-VPC targets, and any external authentication endpoints. Add
+explicit destination and port rules for traffic outside the backend SG's ranges.
+The backend SG continues to allow all ports within its configured VPC ranges.
+
 ## mTLS (Mutual TLS)
 
 By default mTLS for ALB listener is enable with this module.
@@ -106,6 +118,7 @@ No modules.
 | <a name="input_enable_deletion_protection"></a> [enable\_deletion\_protection](#input\_enable\_deletion\_protection) | If true, deletion of the load balancer will be disabled via the AWS API | `bool` | `true` | no |
 | <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | The time in seconds that the connection is allowed to be idle | `number` | `60` | no |
 | <a name="input_internal"></a> [internal](#input\_internal) | Set NLB to be internal (available only within VPC) | `bool` | n/a | yes |
+| <a name="input_internet_egress_sg_rules"></a> [internet\_egress\_sg\_rules](#input\_internet\_egress\_sg\_rules) | Outbound rules for the internet-facing ALB security group. Defaults to unrestricted IPv4 egress; set [] to rely on the attached backend SG's VPC egress. Include external targets and authentication endpoints when required. | <pre>set(object({<br/>    description      = optional(string, "")<br/>    protocol         = string<br/>    from_port        = number<br/>    to_port          = number<br/>    security_groups  = optional(list(string), [])<br/>    cidr_blocks      = optional(list(string), [])<br/>    ipv6_cidr_blocks = optional(list(string), [])<br/>  }))</pre> | <pre>[<br/>  {<br/>    "cidr_blocks": [<br/>      "0.0.0.0/0"<br/>    ],<br/>    "description": "Allow outbound traffic to any IPv4 address",<br/>    "from_port": 0,<br/>    "protocol": "-1",<br/>    "to_port": 0<br/>  }<br/>]</pre> | no |
 | <a name="input_mtls_enabled"></a> [mtls\_enabled](#input\_mtls\_enabled) | Enable mutual TLS (mTLS) on the ALB TLS listener | `bool` | `true` | no |
 | <a name="input_mtls_s3_bucket"></a> [mtls\_s3\_bucket](#input\_mtls\_s3\_bucket) | S3 bucket where the CA certificates for mTLS are stored | `string` | `"wld-mtls-ca-us-east-1"` | no |
 | <a name="input_mtls_s3_key"></a> [mtls\_s3\_key](#input\_mtls\_s3\_key) | S3 key where the CA certificates for mTLS are stored | `string` | `"ca_cert/RootCA.pem"` | no |
@@ -127,6 +140,7 @@ No modules.
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the NLB. |
 | <a name="output_dns_name"></a> [dns\_name](#output\_dns\_name) | The DNS name of the NLB. |
 | <a name="output_listener_arn"></a> [listener\_arn](#output\_listener\_arn) | The ARN of the ALB default listener. |
+| <a name="output_sg_egress_rules"></a> [sg\_egress\_rules](#output\_sg\_egress\_rules) | Outbound rules for attached security groups, keyed by backend and internet. |
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security Group attached to loadbalancer |
 | <a name="output_ssl_policy"></a> [ssl\_policy](#output\_ssl\_policy) | SSL Policy attached to loadbalancer |
 | <a name="output_trust_store_arn"></a> [trust\_store\_arn](#output\_trust\_store\_arn) | The ARN of the mTLS trust store. |

@@ -56,6 +56,36 @@ variable "internal" {
   type        = bool
 }
 
+variable "internet_egress_sg_rules" {
+  description = "Outbound rules for the internet-facing ALB security group. Defaults to unrestricted IPv4 egress; set [] to rely on the attached backend SG's VPC egress. Include external targets and authentication endpoints when required."
+  type = set(object({
+    description      = optional(string, "")
+    protocol         = string
+    from_port        = number
+    to_port          = number
+    security_groups  = optional(list(string), [])
+    cidr_blocks      = optional(list(string), [])
+    ipv6_cidr_blocks = optional(list(string), [])
+  }))
+  default = [{
+    description = "Allow outbound traffic to any IPv4 address"
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }]
+  nullable = false
+
+  validation {
+    condition = alltrue([
+      for rule in var.internet_egress_sg_rules : rule == null ? false : (
+        length(rule.security_groups) + length(rule.cidr_blocks) + length(rule.ipv6_cidr_blocks) > 0
+      )
+    ])
+    error_message = "Each internet egress rule must specify at least one security group, IPv4 CIDR or IPv6 CIDR destination."
+  }
+}
+
 variable "backend_ingress_rules" {
   description = "The security group rules to allow ingress from."
   type = set(object({
