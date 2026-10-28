@@ -16,14 +16,19 @@ resource "aws_security_group" "alb" {
   description = "SG attached to ALB exposing LB to the internet"
   vpc_id      = var.vpc_id
 
+  # Attribute syntax ensures [] revokes existing rules instead of leaving them unmanaged.
   #trivy:ignore:aws-vpc-no-public-egress-sgr
-  egress {
-    description = "Allow outbound traffic to any IPv4 address"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  egress = [for rule in var.internet_egress_sg_rules : {
+    description      = rule.description
+    from_port        = rule.from_port
+    to_port          = rule.to_port
+    protocol         = rule.protocol
+    security_groups  = rule.security_groups
+    cidr_blocks      = rule.cidr_blocks
+    ipv6_cidr_blocks = rule.ipv6_cidr_blocks
+    prefix_list_ids  = []
+    self             = false
+  }]
 
   ingress {
     description = var.open_to_all ? "Allow HTTPS from any IPv4 address" : "Allow HTTPS from Cloudflare IPv4 ranges"
