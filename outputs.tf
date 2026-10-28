@@ -21,6 +21,14 @@ output "sg_ids" {
   }
 }
 
+output "sg_egress_rules" {
+  description = "Outbound rules for attached security groups, keyed by backend and internet."
+  value = {
+    backend  = aws_security_group.alb_backend.egress
+    internet = var.internal ? toset([]) : aws_security_group.alb[0].egress
+  }
+}
+
 output "ssl_policy" {
   description = "SSL Policy attached to loadbalancer"
   value       = var.create_default_listener ? aws_lb_listener.tls[0].ssl_policy : null

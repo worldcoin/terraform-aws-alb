@@ -140,6 +140,7 @@ No modules.
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the NLB. |
 | <a name="output_dns_name"></a> [dns\_name](#output\_dns\_name) | The DNS name of the NLB. |
 | <a name="output_listener_arn"></a> [listener\_arn](#output\_listener\_arn) | The ARN of the ALB default listener. |
+| <a name="output_sg_egress_rules"></a> [sg\_egress\_rules](#output\_sg\_egress\_rules) | Outbound rules for attached security groups, keyed by backend and internet. |
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security Group attached to loadbalancer |
 | <a name="output_ssl_policy"></a> [ssl\_policy](#output\_ssl\_policy) | SSL Policy attached to loadbalancer |
 | <a name="output_trust_store_arn"></a> [trust\_store\_arn](#output\_trust\_store\_arn) | The ARN of the mTLS trust store. |
