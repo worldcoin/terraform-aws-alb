@@ -77,6 +77,24 @@ run "restricted_external_destination_replaces_broad_rule" {
   }
 }
 
+run "omitted_description_has_useful_fallback" {
+  command = plan
+
+  variables {
+    internet_egress_sg_rules = [{
+      protocol         = "tcp"
+      from_port        = 8443
+      to_port          = 8443
+      ipv6_cidr_blocks = ["2001:db8::/64"]
+    }]
+  }
+
+  assert {
+    condition     = one(aws_security_group.alb[0].egress).description == "Allow TCP/8443-8443 to configured destinations"
+    error_message = "Custom rules without descriptions must retain useful audit context."
+  }
+}
+
 run "internal_alb_has_only_backend_sg" {
   command = plan
 

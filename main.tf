@@ -19,7 +19,7 @@ resource "aws_security_group" "alb" {
   # Attribute syntax ensures [] revokes existing rules instead of leaving them unmanaged.
   #trivy:ignore:aws-vpc-no-public-egress-sgr
   egress = [for rule in var.internet_egress_sg_rules : {
-    description      = rule.description
+    description      = coalesce(rule.description, format("Allow %s/%d-%d to configured destinations", upper(rule.protocol), rule.from_port, rule.to_port))
     from_port        = rule.from_port
     to_port          = rule.to_port
     protocol         = rule.protocol
