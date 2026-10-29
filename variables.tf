@@ -57,7 +57,7 @@ variable "internal" {
 }
 
 variable "internet_egress_sg_rules" {
-  description = "Outbound rules for the internet-facing ALB security group. Defaults to unrestricted IPv4 egress; set [] to rely on the attached backend SG's VPC egress. Include external targets and authentication endpoints when required."
+  description = "Outbound rules for the internet-facing ALB security group. Defaults to no rules, relying on the attached backend SG's VPC egress. Configure destinations outside those ranges, including external authentication endpoints, explicitly."
   type = set(object({
     description      = optional(string, "")
     protocol         = string
@@ -67,13 +67,7 @@ variable "internet_egress_sg_rules" {
     cidr_blocks      = optional(list(string), [])
     ipv6_cidr_blocks = optional(list(string), [])
   }))
-  default = [{
-    description = "Allow outbound traffic to any IPv4 address"
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }]
+  default  = []
   nullable = false
 
   validation {

@@ -8,26 +8,21 @@ mock_provider "cloudflare" {
 
 mock_provider "datadog" {}
 
-run "default_preserves_existing_internet_egress" {
+run "default_relies_on_backend_vpc_egress" {
   command = plan
 
   assert {
-    condition = jsonencode(aws_security_group.alb[0].egress) == jsonencode([{
-      description      = "Allow outbound traffic to any IPv4 address"
-      from_port        = 0
-      to_port          = 0
-      protocol         = "-1"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      security_groups  = []
-      prefix_list_ids  = []
-      self             = false
-    }])
-    error_message = "Existing callers must retain exactly the original unrestricted IPv4 rule."
+    condition     = length(aws_security_group.alb[0].egress) == 0
+    error_message = "Omitted rules must leave internet-SG egress empty."
+  }
+
+  assert {
+    condition     = length(aws_security_group.alb_backend.egress) == 1 && one(aws_security_group.alb_backend.egress).protocol == "-1" && toset(one(aws_security_group.alb_backend.egress).cidr_blocks) == toset([data.aws_vpc.current.cidr_block]) && toset(one(aws_security_group.alb_backend.egress).ipv6_cidr_blocks) == toset(local.vpc_ipv6_cidr_blocks)
+    error_message = "The default must preserve all-port IPv4 and IPv6 backend VPC egress."
   }
 }
 
-run "null_preserves_existing_internet_egress" {
+run "null_inherits_restricted_default" {
   command = plan
 
   variables {
@@ -35,8 +30,13 @@ run "null_preserves_existing_internet_egress" {
   }
 
   assert {
-    condition     = length(aws_security_group.alb[0].egress) == 1 && one(aws_security_group.alb[0].egress).protocol == "-1" && toset(one(aws_security_group.alb[0].egress).cidr_blocks) == toset(["0.0.0.0/0"])
-    error_message = "Null must use the backwards-compatible default."
+    condition     = length(aws_security_group.alb[0].egress) == 0
+    error_message = "Null must inherit empty internet-SG egress."
+  }
+
+  assert {
+    condition     = length(aws_security_group.alb_backend.egress) == 1 && one(aws_security_group.alb_backend.egress).protocol == "-1" && toset(one(aws_security_group.alb_backend.egress).cidr_blocks) == toset([data.aws_vpc.current.cidr_block]) && toset(one(aws_security_group.alb_backend.egress).ipv6_cidr_blocks) == toset(local.vpc_ipv6_cidr_blocks)
+    error_message = "The default must preserve all-port IPv4 and IPv6 backend VPC egress."
   }
 }
 
@@ -58,7 +58,7 @@ run "empty_revokes_internet_egress_and_preserves_backend" {
   }
 }
 
-run "restricted_external_destination_replaces_broad_rule" {
+run "explicit_external_destination_plans" {
   command = plan
 
   variables {
@@ -73,7 +73,7 @@ run "restricted_external_destination_replaces_broad_rule" {
 
   assert {
     condition     = length(aws_security_group.alb[0].egress) == 1 && one(aws_security_group.alb[0].egress).protocol == "tcp" && one(aws_security_group.alb[0].egress).from_port == 443 && one(aws_security_group.alb[0].egress).to_port == 443 && toset(one(aws_security_group.alb[0].egress).cidr_blocks) == toset(["192.0.2.10/32"])
-    error_message = "Custom rules must replace unrestricted egress rather than append to it."
+    error_message = "Explicit rules must allow only the configured external destination."
   }
 }
 
@@ -99,8 +99,7 @@ run "internal_alb_has_only_backend_sg" {
   command = plan
 
   variables {
-    internal                 = true
-    internet_egress_sg_rules = []
+    internal = true
   }
 
   assert {
