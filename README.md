@@ -37,6 +37,22 @@ module "alb" {
 }
 ```
 
+## EKS cluster tracking
+
+Set `cluster_tag` explicitly to the AWS Load Balancer Controller's cluster name
+for an EKS ALB. `terraform-aws-eks` passes this for its Gateway API ALBs.
+Standalone ECS, Lambda, and other ALBs should leave it empty. `cluster_name`
+continues to control resource naming and access-log prefixes; it does not opt
+an ALB into EKS tracking or Infrastructure EKS traffic-loss monitoring.
+Non-empty `tags` still fully replaces the module's default tags, including
+`cluster_tag`.
+
+Before upgrading an existing EKS caller, ensure it explicitly supplies
+`cluster_tag`. For standalone callers, verify that the plan removes
+`elbv2.k8s.aws/cluster` from the existing ALB and default listener despite
+`ignore_changes = [tags_all]`, then verify AWS and Datadog tag propagation.
+Keep monitor exclusions until that verification is complete.
+
 ## Internet security group egress
 
 `internet_egress_sg_rules` replaces the internet-facing SG's outbound rules.
@@ -113,7 +129,7 @@ No modules.
 | <a name="input_application"></a> [application](#input\_application) | Name of application which will be connected to this ALB | `string` | n/a | yes |
 | <a name="input_backend_ingress_rules"></a> [backend\_ingress\_rules](#input\_backend\_ingress\_rules) | The security group rules to allow ingress from. | <pre>set(object({<br/>    description      = optional(string, "")<br/>    protocol         = optional(string, "tcp")<br/>    port             = optional(number, 443)<br/>    security_groups  = optional(list(string))<br/>    cidr_blocks      = optional(list(string))<br/>    ipv6_cidr_blocks = optional(list(string))<br/>  }))</pre> | `[]` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster will be used as suffix to all resources | `string` | n/a | yes |
-| <a name="input_cluster_tag"></a> [cluster\_tag](#input\_cluster\_tag) | Value for the elbv2.k8s.aws/cluster tag. Defaults to cluster\_name. Use when the tag must differ from the name used to construct the LB name (e.g. Gateway API where the LB name prefix is trimmed but the tag must match the LBC --cluster-name). | `string` | `""` | no |
+| <a name="input_cluster_tag"></a> [cluster\_tag](#input\_cluster\_tag) | EKS cluster name for the elbv2.k8s.aws/cluster tag on the ALB and its default listener. Empty or null omits the tag. EKS callers must explicitly set this to the LBC --cluster-name; cluster\_name is only used for resource naming and log prefixes. | `string` | `""` | no |
 | <a name="input_create_default_listener"></a> [create\_default\_listener](#input\_create\_default\_listener) | Create the default HTTPS listener on port 443. Set to false when the listener is managed externally (e.g. by the AWS Gateway API controller). | `bool` | `true` | no |
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Datadog configuration | <pre>object({<br/>    monitoring_notification_channel  = string<br/>    client_tls_negotiation_threshold = optional(number, 5)<br/>  })</pre> | `null` | no |
 | <a name="input_drop_invalid_header_fields"></a> [drop\_invalid\_header\_fields](#input\_drop\_invalid\_header\_fields) | Drop invalid header fields | `bool` | `true` | no |
@@ -131,7 +147,7 @@ No modules.
 | <a name="input_s3_logs_bucket_id"></a> [s3\_logs\_bucket\_id](#input\_s3\_logs\_bucket\_id) | The ID of S3 bucket where the ALB logs will be stored, enables logging if set | `string` | `null` | no |
 | <a name="input_tag_prefix"></a> [tag\_prefix](#input\_tag\_prefix) | Tag key prefix for LBC resource/stack tags (e.g. ingress.k8s.aws for Ingress, gateway.k8s.aws.alb for Gateway API) | `string` | `"ingress.k8s.aws"` | no |
 | <a name="input_tag_stack"></a> [tag\_stack](#input\_tag\_stack) | Override the computed stack tag value (default: namespace.application) | `string` | `""` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags for the ALB and its default listener. If non-empty, these fully replace the module's default tags (`elbv2.k8s.aws/cluster`, `<tag_prefix>/resource`, `<tag_prefix>/stack`) instead of merging with them - use this for an ALB that must not be tracked/managed by an EKS AWS Load Balancer Controller (e.g. a Lambda-backed ALB). | `map(string)` | `{}` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags for the ALB and its default listener. If non-empty, these fully replace the module's default resource/stack tags and the optional cluster\_tag instead of merging with them. | `map(string)` | `{}` | no |
 | <a name="input_tls_listener_version"></a> [tls\_listener\_version](#input\_tls\_listener\_version) | Minimum TLS version served by TLS listener | `string` | `"1.3"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID where the NLB will be deployed | `string` | n/a | yes |
 
