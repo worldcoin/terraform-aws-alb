@@ -9,12 +9,12 @@ mock_provider "cloudflare" {
 
 mock_provider "datadog" {}
 
-run "default_tags" {
+run "standalone_alb_omits_cluster_tag" {
   command = plan
 
   assert {
-    condition     = aws_lb.alb.tags["elbv2.k8s.aws/cluster"] == var.cluster_name
-    error_message = "Default elbv2.k8s.aws/cluster tag should equal cluster_name when var.tags is empty"
+    condition     = !contains(keys(aws_lb.alb.tags), "elbv2.k8s.aws/cluster")
+    error_message = "Standalone ALBs must not inherit an EKS cluster tag from cluster_name"
   }
 
   assert {
@@ -28,8 +28,8 @@ run "default_tags" {
   }
 
   assert {
-    condition     = aws_lb_listener.tls[0].tags["elbv2.k8s.aws/cluster"] == var.cluster_name
-    error_message = "Listener should carry the same default cluster tag as the ALB"
+    condition     = !contains(keys(aws_lb_listener.tls[0].tags), "elbv2.k8s.aws/cluster")
+    error_message = "Standalone ALB listeners must not carry an EKS cluster tag"
   }
 }
 
@@ -37,6 +37,7 @@ run "tags_fully_replace_defaults" {
   command = plan
 
   variables {
+    cluster_tag = "eks-cluster"
     tags = {
       Team = "infrastructure"
     }
@@ -61,21 +62,87 @@ run "null_tags_falls_back_to_defaults" {
   }
 
   assert {
-    condition     = aws_lb.alb.tags["elbv2.k8s.aws/cluster"] == var.cluster_name
-    error_message = "var.tags = null should behave like the {} default (nullable = false), not error or omit defaults"
+    condition     = aws_lb.alb.tags == tomap({ "ingress.k8s.aws/resource" = "LoadBalancer", "ingress.k8s.aws/stack" = "${var.namespace}.${var.application}" })
+    error_message = "Null tags must use the standalone defaults without an EKS cluster tag"
   }
 }
 
-run "cluster_tag_variable_still_feeds_the_default" {
+run "eks_cluster_tag_is_explicit" {
   command = plan
 
   variables {
     cluster_tag = "custom-cluster-tag"
+    tag_prefix  = "gateway.k8s.aws.alb"
+    tag_stack   = "kube-system/gw-ext-alb"
   }
 
   assert {
     condition     = aws_lb.alb.tags["elbv2.k8s.aws/cluster"] == "custom-cluster-tag"
-    error_message = "var.cluster_tag should still set the default elbv2.k8s.aws/cluster value when var.tags is empty"
+    error_message = "EKS ALBs must use the explicit cluster_tag instead of the resource naming prefix"
+  }
+
+  assert {
+    condition     = aws_lb_listener.tls[0].tags["elbv2.k8s.aws/cluster"] == "custom-cluster-tag"
+    error_message = "EKS listeners must carry the explicit cluster tag"
+  }
+
+  assert {
+    condition     = aws_lb.alb.tags["gateway.k8s.aws.alb/stack"] == "kube-system/gw-ext-alb" && aws_lb.alb.tags["gateway.k8s.aws.alb/resource"] == "LoadBalancer"
+    error_message = "Explicit cluster tagging must preserve Gateway API resource and stack tags"
+  }
+
+  assert {
+    condition     = aws_lb.alb.name == "test-cluster"
+    error_message = "The cluster tag must not change the ALB resource name"
+  }
+}
+
+run "null_cluster_tag_omits_cluster_tracking" {
+  command = plan
+
+  variables {
+    cluster_tag = null
+  }
+
+  assert {
+    condition     = !contains(keys(aws_lb.alb.tags), "elbv2.k8s.aws/cluster") && !contains(keys(aws_lb_listener.tls[0].tags), "elbv2.k8s.aws/cluster")
+    error_message = "A null cluster_tag must omit EKS tracking on both the ALB and listener"
+  }
+}
+
+run "existing_alb_with_cluster_tag" {
+  command = apply
+
+  variables {
+    cluster_tag = "test-cluster-us-east-1"
+  }
+
+  override_resource {
+    target = aws_lb.alb
+    values = {
+      arn = "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/test-cluster/0123456789abcdef"
+    }
+  }
+
+  override_resource {
+    target = aws_lb_trust_store.root_ca[0]
+    values = {
+      arn = "arn:aws:elasticloadbalancing:us-east-1:123456789012:truststore/test-cluster/0123456789abcdef"
+    }
+  }
+}
+
+run "remove_existing_cluster_tag" {
+  command = plan
+
+  assert {
+    condition     = !contains(keys(aws_lb.alb.tags), "elbv2.k8s.aws/cluster") && !contains(keys(aws_lb_listener.tls[0].tags), "elbv2.k8s.aws/cluster")
+    error_message = "Explicit tags must lose cluster tracking when an existing standalone ALB opts out"
+  }
+
+  assert {
+    condition     = aws_lb.alb.arn == run.existing_alb_with_cluster_tag.arn && aws_lb_listener.tls[0].arn == run.existing_alb_with_cluster_tag.listener_arn
+    error_message = "Removing the cluster tag must preserve the existing ALB and listener"
   }
 }
 

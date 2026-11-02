@@ -161,7 +161,7 @@ variable "create_default_listener" {
 }
 
 variable "tags" {
-  description = "Tags for the ALB and its default listener. If non-empty, these fully replace the module's default tags (`elbv2.k8s.aws/cluster`, `<tag_prefix>/resource`, `<tag_prefix>/stack`) instead of merging with them - use this for an ALB that must not be tracked/managed by an EKS AWS Load Balancer Controller (e.g. a Lambda-backed ALB)."
+  description = "Tags for the ALB and its default listener. If non-empty, these fully replace the module's default resource/stack tags and the optional cluster_tag instead of merging with them."
   type        = map(string)
   default     = {}
   nullable    = false
@@ -180,9 +180,10 @@ variable "tag_stack" {
 }
 
 variable "cluster_tag" {
-  description = "Value for the elbv2.k8s.aws/cluster tag. Defaults to cluster_name. Use when the tag must differ from the name used to construct the LB name (e.g. Gateway API where the LB name prefix is trimmed but the tag must match the LBC --cluster-name)."
+  description = "EKS cluster name for the elbv2.k8s.aws/cluster tag on the ALB and its default listener. Empty or null omits the tag. EKS callers must explicitly set this to the LBC --cluster-name; cluster_name is only used for resource naming and log prefixes."
   type        = string
   default     = ""
+  nullable    = false
 }
 
 variable "datadog" {
