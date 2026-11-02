@@ -48,10 +48,12 @@ Non-empty `tags` still fully replaces the module's default tags, including
 `cluster_tag`.
 
 Before upgrading an existing EKS caller, ensure it explicitly supplies
-`cluster_tag`. For standalone callers, verify that the plan removes
-`elbv2.k8s.aws/cluster` from the existing ALB and default listener despite
-`ignore_changes = [tags_all]`, then verify AWS and Datadog tag propagation.
-Keep monitor exclusions until that verification is complete.
+`cluster_tag`. Terraform manages the ALB and listener tags, including provider
+default tags; keep controller-applied tags aligned with that configuration.
+For standalone callers, verify that the plan removes `elbv2.k8s.aws/cluster`
+from both `tags` and the provider's effective `tags_all`, then verify AWS and
+Datadog tag propagation. Keep monitor exclusions until that verification is
+complete.
 
 ## Internet security group egress
 

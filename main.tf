@@ -132,9 +132,6 @@ resource "aws_lb" "alb" {
     "${var.tag_prefix}/stack"    = local.stack
   }, var.cluster_tag != "" ? { "elbv2.k8s.aws/cluster" = var.cluster_tag } : {})
 
-  lifecycle {
-    ignore_changes = [tags_all]
-  }
 }
 
 resource "aws_lb_listener" "tls" {
@@ -177,7 +174,6 @@ resource "aws_lb_listener" "tls" {
       condition     = var.acm_arn != null
       error_message = "acm_arn is required when create_default_listener is true."
     }
-    ignore_changes = [tags_all]
   }
 }
 
