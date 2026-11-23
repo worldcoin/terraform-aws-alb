@@ -112,6 +112,12 @@ variable "tls_listener_version" {
   }
 }
 
+variable "hsts_header_value" {
+  description = "Strict-Transport-Security response header for the external ALB HTTPS listener. Set to null to skip configuring it or set a custom header value."
+  type        = string
+  default     = "max-age=31536000"
+}
+
 variable "idle_timeout" {
   description = "The time in seconds that the connection is allowed to be idle"
   type        = number

@@ -67,6 +67,19 @@ VPC CIDRs, cross-VPC targets, and any external authentication endpoints. Add
 explicit destination and port rules for traffic outside the backend SG's ranges.
 The backend SG continues to allow all ports within its configured VPC ranges.
 
+## HTTPS listener defaults
+
+`tls_listener_version`:
+
+| Value | Security policy |
+|-------|-----------------|
+| `"1.3"` (default) | `ELBSecurityPolicy-TLS13-1-3-PQ-2025-09` |
+| `"1.2"` | `ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09` |
+
+- External ALBs replace target HSTS with `max-age=31536000`; customize with `hsts_header_value`.
+- `null` skips configuration on new listeners and retains existing values. Use `"max-age=0"` to clear returning clients' cached HSTS.
+- Internal ALBs omit HSTS. Externally managed listeners keep their own TLS and HSTS configuration.
+
 ## mTLS (Mutual TLS)
 
 By default mTLS for ALB listener is enable with this module.
@@ -134,6 +147,7 @@ No modules.
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Datadog configuration | <pre>object({<br/>    monitoring_notification_channel  = string<br/>    client_tls_negotiation_threshold = optional(number, 5)<br/>  })</pre> | `null` | no |
 | <a name="input_drop_invalid_header_fields"></a> [drop\_invalid\_header\_fields](#input\_drop\_invalid\_header\_fields) | Drop invalid header fields | `bool` | `true` | no |
 | <a name="input_enable_deletion_protection"></a> [enable\_deletion\_protection](#input\_enable\_deletion\_protection) | If true, deletion of the load balancer will be disabled via the AWS API | `bool` | `true` | no |
+| <a name="input_hsts_header_value"></a> [hsts\_header\_value](#input\_hsts\_header\_value) | Strict-Transport-Security response header for the external ALB HTTPS listener. Set to null to skip configuring it or set a custom header value. | `string` | `"max-age=31536000"` | no |
 | <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | The time in seconds that the connection is allowed to be idle | `number` | `60` | no |
 | <a name="input_internal"></a> [internal](#input\_internal) | Set NLB to be internal (available only within VPC) | `bool` | n/a | yes |
 | <a name="input_internet_egress_sg_rules"></a> [internet\_egress\_sg\_rules](#input\_internet\_egress\_sg\_rules) | Outbound rules for the internet-facing ALB security group. Defaults to no rules, relying on the attached backend SG's VPC egress. Configure destinations outside those ranges, including external authentication endpoints, explicitly. | <pre>set(object({<br/>    description      = optional(string, "")<br/>    protocol         = string<br/>    from_port        = number<br/>    to_port          = number<br/>    security_groups  = optional(list(string), [])<br/>    cidr_blocks      = optional(list(string), [])<br/>    ipv6_cidr_blocks = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
