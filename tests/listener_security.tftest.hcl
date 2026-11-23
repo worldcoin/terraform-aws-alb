@@ -19,8 +19,8 @@ run "external_listener_defaults" {
   command = plan
 
   assert {
-    condition     = aws_lb_listener.tls[0].ssl_policy == "ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09"
-    error_message = "The default policy must retain TLS 1.2 and offer post-quantum key exchange with TLS 1.3."
+    condition     = aws_lb_listener.tls[0].ssl_policy == "ELBSecurityPolicy-TLS13-1-3-PQ-2025-09"
+    error_message = "The default policy must retain TLS 1.3-only and offer post-quantum key exchange."
   }
 
   assert {
@@ -39,6 +39,19 @@ run "strict_tls_preserved" {
   assert {
     condition     = aws_lb_listener.tls[0].ssl_policy == "ELBSecurityPolicy-TLS13-1-3-PQ-2025-09"
     error_message = "Explicit TLS 1.3 must select the TLS 1.3-only post-quantum policy."
+  }
+}
+
+run "explicit_tls_1_2_uses_compatible_policy" {
+  command = plan
+
+  variables {
+    tls_listener_version = "1.2"
+  }
+
+  assert {
+    condition     = aws_lb_listener.tls[0].ssl_policy == "ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09"
+    error_message = "Explicit TLS 1.2 must select the post-quantum policy that supports TLS 1.2 and TLS 1.3."
   }
 }
 

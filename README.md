@@ -69,10 +69,11 @@ The backend SG continues to allow all ports within its configured VPC ranges.
 
 ## HTTPS listener defaults
 
-The module-managed HTTPS listener defaults to TLS 1.2 and TLS 1.3 with
-`ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09`. Set `tls_listener_version = "1.3"`
-to require TLS 1.3 with `ELBSecurityPolicy-TLS13-1-3-PQ-2025-09`. Both policies
-offer hybrid post-quantum key exchange to compatible TLS 1.3 clients.
+The module-managed HTTPS listener defaults to TLS 1.3 only with
+`ELBSecurityPolicy-TLS13-1-3-PQ-2025-09`. Set `tls_listener_version = "1.2"`
+to also support TLS 1.2 with `ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09`.
+Both policies offer hybrid post-quantum key exchange to compatible TLS 1.3
+clients.
 
 External ALBs set `Strict-Transport-Security: max-age=31536000` on HTTPS
 responses, scoped to the responding host. The listener replaces any HSTS
@@ -85,12 +86,10 @@ browsers to remove cached HSTS when they next receive an HTTPS response.
 Internal ALBs omit the listener HSTS attribute. For listeners managed outside
 this module, configure TLS and HSTS in the listener's owning system.
 
-When upgrading the module in staging, check TLS 1.2 and 1.3 client connections
-and public response headers. Callers that previously omitted
-`tls_listener_version` will now accept TLS 1.2. Set it to `"1.3"` before
-upgrading if your listener must remain TLS 1.3-only. AWS also selects a new
-backend TLS policy for post-quantum listeners, so check HTTPS target health and
-requests to targets during the rollout.
+When upgrading the module in staging, check client handshakes against the
+selected TLS policy and verify public response headers. AWS also selects a new
+backend TLS policy for post-quantum listeners, so check HTTPS target health
+and requests to targets during the rollout.
 [AWS ALB security policies](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/describe-ssl-policies.html)
 
 ## mTLS (Mutual TLS)
@@ -175,7 +174,7 @@ No modules.
 | <a name="input_tag_prefix"></a> [tag\_prefix](#input\_tag\_prefix) | Tag key prefix for LBC resource/stack tags (e.g. ingress.k8s.aws for Ingress, gateway.k8s.aws.alb for Gateway API) | `string` | `"ingress.k8s.aws"` | no |
 | <a name="input_tag_stack"></a> [tag\_stack](#input\_tag\_stack) | Override the computed stack tag value (default: namespace.application) | `string` | `""` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags for the ALB and its default listener. If non-empty, these fully replace the module's default resource/stack tags and the optional cluster\_tag instead of merging with them. | `map(string)` | `{}` | no |
-| <a name="input_tls_listener_version"></a> [tls\_listener\_version](#input\_tls\_listener\_version) | Minimum TLS version served by TLS listener | `string` | `"1.2"` | no |
+| <a name="input_tls_listener_version"></a> [tls\_listener\_version](#input\_tls\_listener\_version) | Minimum TLS version served by TLS listener | `string` | `"1.3"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID where the NLB will be deployed | `string` | n/a | yes |
 
 ## Outputs
