@@ -105,11 +105,17 @@ variable "additional_open_ports" {
 variable "tls_listener_version" {
   description = "Minimum TLS version served by TLS listener"
   type        = string
-  default     = "1.3"
+  default     = "1.2"
   validation {
     condition     = var.tls_listener_version == "1.2" || var.tls_listener_version == "1.3"
     error_message = "Only TLS >= 1.2 or 1.3 are supported"
   }
+}
+
+variable "hsts_header_value" {
+  description = "Strict-Transport-Security response header for the external ALB HTTPS listener. Set to null to skip configuring it or set a custom header value."
+  type        = string
+  default     = "max-age=31536000"
 }
 
 variable "idle_timeout" {

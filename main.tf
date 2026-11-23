@@ -144,8 +144,8 @@ resource "aws_lb_listener" "tls" {
   protocol          = "HTTPS"
   certificate_arn   = var.acm_arn
 
-
-  ssl_policy = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-2021-06" : "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
+  ssl_policy                                                   = var.tls_listener_version == "1.3" ? "ELBSecurityPolicy-TLS13-1-3-PQ-2025-09" : "ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09"
+  routing_http_response_strict_transport_security_header_value = var.internal ? null : var.hsts_header_value
 
   # Same full-replace semantics as aws_lb.alb.tags above.
   tags = length(var.tags) > 0 ? var.tags : merge({

@@ -67,6 +67,32 @@ VPC CIDRs, cross-VPC targets, and any external authentication endpoints. Add
 explicit destination and port rules for traffic outside the backend SG's ranges.
 The backend SG continues to allow all ports within its configured VPC ranges.
 
+## HTTPS listener defaults
+
+The module-managed HTTPS listener defaults to TLS 1.2 and TLS 1.3 with
+`ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09`. Set `tls_listener_version = "1.3"`
+to require TLS 1.3 with `ELBSecurityPolicy-TLS13-1-3-PQ-2025-09`. Both policies
+offer hybrid post-quantum key exchange to compatible TLS 1.3 clients.
+
+External ALBs set `Strict-Transport-Security: max-age=31536000` on HTTPS
+responses, scoped to the responding host. The listener replaces any HSTS
+header from the target. Set `hsts_header_value` to a custom header value, or
+set it to `null` to skip configuration and let the target control HSTS on a
+new listener. The AWS provider leaves existing listener values in place when
+this input is set to `null`. Set `hsts_header_value = "max-age=0"` to direct
+browsers to remove cached HSTS when they next receive an HTTPS response.
+
+Internal ALBs omit the listener HSTS attribute. For listeners managed outside
+this module, configure TLS and HSTS in the listener's owning system.
+
+When upgrading the module in staging, check TLS 1.2 and 1.3 client connections
+and public response headers. Callers that previously omitted
+`tls_listener_version` will now accept TLS 1.2. Set it to `"1.3"` before
+upgrading if your listener must remain TLS 1.3-only. AWS also selects a new
+backend TLS policy for post-quantum listeners, so check HTTPS target health and
+requests to targets during the rollout.
+[AWS ALB security policies](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/describe-ssl-policies.html)
+
 ## mTLS (Mutual TLS)
 
 By default mTLS for ALB listener is enable with this module.
@@ -134,6 +160,7 @@ No modules.
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Datadog configuration | <pre>object({<br/>    monitoring_notification_channel  = string<br/>    client_tls_negotiation_threshold = optional(number, 5)<br/>  })</pre> | `null` | no |
 | <a name="input_drop_invalid_header_fields"></a> [drop\_invalid\_header\_fields](#input\_drop\_invalid\_header\_fields) | Drop invalid header fields | `bool` | `true` | no |
 | <a name="input_enable_deletion_protection"></a> [enable\_deletion\_protection](#input\_enable\_deletion\_protection) | If true, deletion of the load balancer will be disabled via the AWS API | `bool` | `true` | no |
+| <a name="input_hsts_header_value"></a> [hsts\_header\_value](#input\_hsts\_header\_value) | Strict-Transport-Security response header for the external ALB HTTPS listener. Set to null to skip configuring it or set a custom header value. | `string` | `"max-age=31536000"` | no |
 | <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | The time in seconds that the connection is allowed to be idle | `number` | `60` | no |
 | <a name="input_internal"></a> [internal](#input\_internal) | Set NLB to be internal (available only within VPC) | `bool` | n/a | yes |
 | <a name="input_internet_egress_sg_rules"></a> [internet\_egress\_sg\_rules](#input\_internet\_egress\_sg\_rules) | Outbound rules for the internet-facing ALB security group. Defaults to no rules, relying on the attached backend SG's VPC egress. Configure destinations outside those ranges, including external authentication endpoints, explicitly. | <pre>set(object({<br/>    description      = optional(string, "")<br/>    protocol         = string<br/>    from_port        = number<br/>    to_port          = number<br/>    security_groups  = optional(list(string), [])<br/>    cidr_blocks      = optional(list(string), [])<br/>    ipv6_cidr_blocks = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
@@ -148,7 +175,7 @@ No modules.
 | <a name="input_tag_prefix"></a> [tag\_prefix](#input\_tag\_prefix) | Tag key prefix for LBC resource/stack tags (e.g. ingress.k8s.aws for Ingress, gateway.k8s.aws.alb for Gateway API) | `string` | `"ingress.k8s.aws"` | no |
 | <a name="input_tag_stack"></a> [tag\_stack](#input\_tag\_stack) | Override the computed stack tag value (default: namespace.application) | `string` | `""` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags for the ALB and its default listener. If non-empty, these fully replace the module's default resource/stack tags and the optional cluster\_tag instead of merging with them. | `map(string)` | `{}` | no |
-| <a name="input_tls_listener_version"></a> [tls\_listener\_version](#input\_tls\_listener\_version) | Minimum TLS version served by TLS listener | `string` | `"1.3"` | no |
+| <a name="input_tls_listener_version"></a> [tls\_listener\_version](#input\_tls\_listener\_version) | Minimum TLS version served by TLS listener | `string` | `"1.2"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID where the NLB will be deployed | `string` | n/a | yes |
 
 ## Outputs
