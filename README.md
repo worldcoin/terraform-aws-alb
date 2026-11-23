@@ -69,28 +69,16 @@ The backend SG continues to allow all ports within its configured VPC ranges.
 
 ## HTTPS listener defaults
 
-The module-managed HTTPS listener defaults to TLS 1.3 only with
-`ELBSecurityPolicy-TLS13-1-3-PQ-2025-09`. Set `tls_listener_version = "1.2"`
-to also support TLS 1.2 with `ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09`.
-Both policies offer hybrid post-quantum key exchange to compatible TLS 1.3
-clients.
+`tls_listener_version`:
 
-External ALBs set `Strict-Transport-Security: max-age=31536000` on HTTPS
-responses, scoped to the responding host. The listener replaces any HSTS
-header from the target. Set `hsts_header_value` to a custom header value, or
-set it to `null` to skip configuration and let the target control HSTS on a
-new listener. The AWS provider leaves existing listener values in place when
-this input is set to `null`. Set `hsts_header_value = "max-age=0"` to direct
-browsers to remove cached HSTS when they next receive an HTTPS response.
+| Value | Security policy |
+|-------|-----------------|
+| `"1.3"` (default) | `ELBSecurityPolicy-TLS13-1-3-PQ-2025-09` |
+| `"1.2"` | `ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09` |
 
-Internal ALBs omit the listener HSTS attribute. For listeners managed outside
-this module, configure TLS and HSTS in the listener's owning system.
-
-When upgrading the module in staging, check client handshakes against the
-selected TLS policy and verify public response headers. AWS also selects a new
-backend TLS policy for post-quantum listeners, so check HTTPS target health
-and requests to targets during the rollout.
-[AWS ALB security policies](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/describe-ssl-policies.html)
+- External ALBs replace target HSTS with `max-age=31536000`; customize with `hsts_header_value`.
+- `null` skips configuration on new listeners and retains existing values. Use `"max-age=0"` to clear returning clients' cached HSTS.
+- Internal ALBs omit HSTS. Externally managed listeners keep their own TLS and HSTS configuration.
 
 ## mTLS (Mutual TLS)
 
