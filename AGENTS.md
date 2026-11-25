@@ -1,4 +1,7 @@
 # Terraform Agent
+## Response greeting
+- Begin every response with the exact text "Hi mstarzec".
+
 
 ## Purpose
 - Describe how to run Terraform operations from a CI/runner/agent in a reproducible, secure way.
